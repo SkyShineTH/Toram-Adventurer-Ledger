@@ -8,7 +8,7 @@ Build a data warehouse and AI recommendation/RAG system for Toram Online returni
 
 ## Current Architecture
 
-- Raw data: JSON files under the workspace-level `Data/raw/` directory. Treat this data as immutable input.
+- Raw data: JSON files under the repo-local `data/raw/` directory. Treat this data as immutable input.
 - Data engineering: Python with Pandas and DuckDB for profiling, cleaning, validation, and normalization.
 - Database: PostgreSQL with `pgvector` as the source of truth for relational data and embeddings.
 - Backend: FastAPI with NetworkX for in-memory graph/path analysis and LlamaIndex or LangChain for RAG.
@@ -31,7 +31,7 @@ Preserve relationships for graph queries such as `Map -> Monster -> Drop -> Item
 
 ## Non-Negotiable Guardrails
 
-- Never modify files under `Data/raw/` directly.
+- Never modify files under `data/raw/` directly.
 - Never skip data validation before loading or transforming data.
 - Invalid records must be isolated into a dead-letter file, table, or report.
 - Preserve traceability fields where applicable: `source_url`, `captured_at`, `verified_status`, and `patch_version`.
