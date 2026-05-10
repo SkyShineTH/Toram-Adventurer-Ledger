@@ -222,3 +222,21 @@ __marimo__/
 data/raw/**
 !data/raw/
 !data/raw/README.md
+
+# Generated validation outputs
+reports/validation/*.json
+reports/validation/*.jsonl
+reports/validation/*.md
+!reports/validation/README.md
+
+# Generated processed data
+data/processed/*.json
+data/processed/*.jsonl
+!data/processed/README.md
+!data/processed/.gitkeep
+
+# Frontend generated files
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local

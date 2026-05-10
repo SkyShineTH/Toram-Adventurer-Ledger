@@ -36,6 +36,8 @@ Every normalized record should retain source traceability when practical:
 
 If a field is unavailable from raw input, the pipeline should explicitly set a null/default value and document the fallback.
 
+Coryn uses negative sentinel values in selected numeric availability fields. The validation layer treats these as known unknown/unavailable values only for documented fields such as item sell/process values and monster HP/EXP/element values.
+
 ## Observed Record Counts
 
 Initial read-only profile:

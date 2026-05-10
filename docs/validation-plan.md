@@ -27,6 +27,7 @@ Initial input files:
 - Required ID fields are present and integer-like.
 - Required display names or titles are present and non-empty.
 - Numeric fields are numeric and non-negative where applicable.
+- Coryn negative sentinel values are allowed only for documented unknown/unavailable fields such as item sell/process values and monster HP/EXP/element values.
 - Boolean fields are boolean, not string labels.
 - Nested objects match expected shape.
 - Objective arrays contain objects with valid `text` when present.
@@ -83,3 +84,19 @@ Before transformation logic is considered complete:
 - duplicate IDs are reported
 - missing references are reported
 - raw files remain unchanged
+
+## Command
+
+Run the current raw-data validation script from the repo root:
+
+```bash
+py scripts/02_validate_raw_data.py
+```
+
+Generated outputs are written to `reports/validation/` and ignored by Git:
+
+- `summary.json`
+- `summary.md`
+- `dead_letter.jsonl`
+
+Use `--fail-on-errors` in CI or strict local checks when validation failures should produce a non-zero exit code.
