@@ -1,0 +1,5 @@
+# CLAUDE AI CONTEXT
+Please refer to the single source of truth for project instructions:
+`.github/copilot-instructions.md`
+
+All project rules, tech stack details, and architectural guidelines are maintained there to prevent context pollution.
