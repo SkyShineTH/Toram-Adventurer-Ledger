@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local raw data cache
+# Keep Coryn/raw API cache local-only unless redistribution rights are confirmed.
+data/raw/**
+!data/raw/
+!data/raw/README.md
