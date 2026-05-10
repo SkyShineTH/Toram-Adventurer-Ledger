@@ -1,0 +1,23 @@
+[
+  {
+    "id": 100,
+    "name": "Sample Pova",
+    "level": 12,
+    "map_id": 10,
+    "map_name": "Sample Meadow",
+    "type_code": "N",
+    "type_label": "Normal",
+    "mode": "Normal",
+    "hp": -1,
+    "exp": 30,
+    "element_id": -1,
+    "element_label": "Unknown",
+    "tameable": false,
+    "limited": false,
+    "meta": {
+      "badge": "",
+      "note": ""
+    }
+  }
+]
+

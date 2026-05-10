@@ -1,0 +1,14 @@
+{
+  "source": "synthetic fixture",
+  "base_url": "https://example.invalid",
+  "fetched_at": "2026-05-10T00:00:00+00:00",
+  "endpoints": [
+    {
+      "endpoint": "items",
+      "records": 1,
+      "reported_total": 1,
+      "pages": []
+    }
+  ]
+}
+

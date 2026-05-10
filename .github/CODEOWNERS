@@ -1,0 +1,9 @@
+# Default repository owner review.
+* @SkyShineTH
+
+# Extra-sensitive areas.
+/scripts/ @SkyShineTH
+/data/raw/ @SkyShineTH
+/database/ @SkyShineTH
+/.github/ @SkyShineTH
+

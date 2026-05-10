@@ -1,0 +1,21 @@
+[
+  {
+    "quest_id": 200,
+    "title": "Sample Errand",
+    "type": "Side Quest",
+    "lv_req": 1,
+    "exp_reward": 100,
+    "npc": {
+      "id": 300,
+      "name": "Sample NPC"
+    },
+    "objectives": [
+      {
+        "text": "Collect 1 xSample Cloth",
+        "target_item_id": 1,
+        "target_item_name": "Sample Cloth"
+      }
+    ]
+  }
+]
+

@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  safety-and-python:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Ensure raw cache is not tracked
+        run: |
+          tracked_raw="$(git ls-files data/raw | grep -v '^data/raw/README.md$' || true)"
+          if [ -n "$tracked_raw" ]; then
+            echo "Raw cache files must not be tracked:"
+            echo "$tracked_raw"
+            exit 1
+          fi
+
+      - name: Compile Python scripts
+        run: |
+          python -m py_compile backend/main.py scripts/01_extract_and_clean.py scripts/02_validate_raw_data.py
+
+      - name: Run validator against synthetic fixture
+        run: |
+          python scripts/02_validate_raw_data.py --raw-dir tests/fixtures/raw_sample --out-dir reports/validation-fixture --fail-on-errors
+
+      - name: Run unit tests
+        run: |
+          python -m unittest discover -s tests
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build

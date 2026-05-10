@@ -228,6 +228,7 @@ reports/validation/*.json
 reports/validation/*.jsonl
 reports/validation/*.md
 !reports/validation/README.md
+reports/validation-fixture/
 
 # Generated processed data
 data/processed/*.json
