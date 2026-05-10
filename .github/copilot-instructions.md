@@ -1,37 +1,69 @@
-# Project Vision: Toram-Adventurer-Ledger
+# Toram-Adventurer-Ledger AI Agent Instructions
 
-## Context & Background
-This project builds a Data Warehouse and an AI Recommendation system (RAG) for Toram Online. Target audience: returning players seeking efficient, casual gameplay (Smart Play) using data-driven insights.
-Goal: Transform raw JSON data (Items, Maps, Monsters, Quests) into a linked relational database optimized for AI (RAG).
+This is the single source of truth for AI coding agents working in this repo. Keep it short, concrete, and executable. Do not duplicate these rules in other agent-specific files.
 
-## Tech Stack (Decoupled Architecture with In-Memory Graph)
-- **Data Engineering:** Python (Pandas/DuckDB) to clean, validate, and normalize raw JSON from `Data/raw/`.
-- **Database:** PostgreSQL + `pgvector` (for vector embeddings) acting as the Single Source of Truth.
-- **Backend API & Compute:** FastAPI (Python) + `NetworkX` (for in-memory graph pathfinding) + `LlamaIndex`/`LangChain` for RAG.
-- **Frontend Web App:** Next.js (React) + Tailwind CSS + shadcn/ui.
+## Mission
 
-## Architecture & Data Pipeline (Medallion Concept)
-1. **Staging & Normalization Layer:**
-   - Transform raw data into a relational schema (`quests`, `quest_objectives`, `npcs`, `drops`, `items`).
-   - **Graph Database Concept:** Design schema considering Node & Edge relationships (e.g., Map -> Monster -> Drop -> Item -> Quest).
-2. **Data Validation & Reliability:**
-   - **Strict Validation:** Enforce column types, foreign keys, duplicate IDs, and source checks before insertion.
-   - **Traceability:** Include reliability fields (`source_url`, `captured_at`, `verified_status`).
-   - **Patch Versioning:** Implement a patch version tracking system (e.g., `patch_version`).
-3. **Recommendation-Ready Data Mart:**
-   - Create aggregated tables/views for recommendations (`leveling_routes`, `quest_efficiency`).
-4. **AI / RAG Readiness:**
-   - Structure schema and documents to support Semantic Search via pgvector.
+Build a data warehouse and AI recommendation/RAG system for Toram Online returning players who want efficient casual gameplay. Transform raw JSON data for items, maps, monsters, quests, NPCs, and drops into a validated relational model that supports graph traversal, recommendations, and semantic search.
 
-## Core Modules & Features
-- **Build Profile Planner:** Store user profiles (Weapon type, stats, goal, budget) for contextual recommendations.
-- **Side Quest Helper:** Find optimal quests, calculate EXP/time efficiency, identify farm locations and NPCs.
-- **Farming & Spina Planner:** Analyze farm spots (NPC sell, quest materials, market items).
-- **Gear Recommendation:** Suggest gear upgrades based on Build Profile.
-- **Dashboard / Explorer UI:** UI to search and view relationships between Items, Quests, Monsters, and Maps.
+## Current Architecture
 
-## Development Constraints & Rules (Blast-radius guardrails)
-- **NEVER** skip Data Validation. Invalid data must be isolated (dead-letter queue).
-- **ALWAYS** design schemas with Semantic Search and Graph Analysis in mind.
-- **KISS Principle:** Keep it simple. Avoid overengineering for a hobby project, but maintain a robust data architecture.
-- **Read-Only Raw Data:** **NEVER** modify files in `Data/raw/` directly. Always use Python scripts to process and load data into the database.
+- Raw data: JSON files under the workspace-level `Data/raw/` directory. Treat this data as immutable input.
+- Data engineering: Python with Pandas and DuckDB for profiling, cleaning, validation, and normalization.
+- Database: PostgreSQL with `pgvector` as the source of truth for relational data and embeddings.
+- Backend: FastAPI with NetworkX for in-memory graph/path analysis and LlamaIndex or LangChain for RAG.
+- Frontend: Next.js, Tailwind CSS, and shadcn/ui for dashboard and explorer workflows.
+
+## Core Data Model Direction
+
+Design around linked game entities:
+
+- `maps`
+- `monsters`
+- `items`
+- `drops`
+- `npcs`
+- `quests`
+- `quest_objectives`
+- recommendation marts such as `leveling_routes`, `quest_efficiency`, and `farming_spots`
+
+Preserve relationships for graph queries such as `Map -> Monster -> Drop -> Item -> Quest`.
+
+## Non-Negotiable Guardrails
+
+- Never modify files under `Data/raw/` directly.
+- Never skip data validation before loading or transforming data.
+- Invalid records must be isolated into a dead-letter file, table, or report.
+- Preserve traceability fields where applicable: `source_url`, `captured_at`, `verified_status`, and `patch_version`.
+- Do not introduce secrets, API keys, credentials, or local machine paths into committed files.
+- Prefer simple implementation over enterprise complexity unless the data model or validation requirement justifies it.
+
+## Agent Workflow
+
+- Inspect existing files before making changes.
+- Keep changes scoped to the requested task and current project stage.
+- When adding ETL logic, include validation and invalid-record handling in the same change.
+- When changing schema, update related migration notes or documentation.
+- When adding API behavior, document request and response shapes.
+- When adding UI behavior, keep it aligned with planner, explorer, and recommendation workflows.
+- If required commands are missing because the repo is not scaffolded yet, say so clearly instead of inventing commands.
+
+## Validation Expectations
+
+For data work, validate at minimum:
+
+- required fields
+- column/type consistency
+- duplicate IDs or names where uniqueness is expected
+- foreign-key-like references between entities
+- source and capture metadata
+- patch/version compatibility
+
+## Definition of Done
+
+- Raw data remains untouched.
+- Validation behavior is explicit.
+- Data relationships remain usable for graph traversal and RAG.
+- Any schema or API contract change is documented.
+- Available tests, linting, build, or validation commands have been run.
+- Missing environment prerequisites or unavailable commands are reported clearly.
