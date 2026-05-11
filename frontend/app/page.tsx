@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { API_BASE_URL, fetchApi } from "../lib/api";
+import { API_BASE_URL, fetchApi } from "./api-client";
 
 type SmartSummary = {
   counts: Record<string, number>;

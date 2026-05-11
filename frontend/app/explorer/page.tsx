@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { type ApiList, fetchApi } from "../../lib/api";
+import { type ApiList, fetchApi } from "../api-client";
 
 type Item = { id: number; name: string; type_label: string | null; sell: number | null };
 type Monster = { id: number; name: string; level: number | null; map_name: string | null; element_label: string | null; exp: number | null };

@@ -28,4 +28,4 @@ Create a local env file when the backend runs somewhere else:
 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
 ```
 
-The API client lives in `lib/api.ts` so pages do not hard-code the backend host.
+The API client lives in `app/api-client.ts` so pages do not hard-code the backend host.
