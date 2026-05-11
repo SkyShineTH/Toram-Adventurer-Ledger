@@ -34,7 +34,11 @@ jobs:
 
       - name: Compile Python scripts
         run: |
-          python -m py_compile backend/main.py backend/repositories.py backend/graph.py scripts/01_extract_and_clean.py scripts/02_validate_raw_data.py scripts/03_load_postgres.py
+          python -m py_compile backend/config.py backend/main.py backend/repositories.py backend/graph.py scripts/01_extract_and_clean.py scripts/02_validate_raw_data.py scripts/03_load_postgres.py
+
+      - name: Validate Docker Compose config
+        run: |
+          docker compose config
 
       - name: Run validator against synthetic fixture
         run: |

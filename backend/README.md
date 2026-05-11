@@ -24,6 +24,7 @@ uvicorn backend.main:app --reload
 Key endpoints:
 
 - `GET /health`
+- `GET /ready`
 - `GET /validation/summary`
 - `GET /validation/findings?limit=&offset=`
 - `GET /dashboard/smart-play`

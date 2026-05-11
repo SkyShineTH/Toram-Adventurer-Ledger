@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -74,6 +74,32 @@ def health() -> dict[str, Any]:
         "processed_data_ready": (PROCESSED_DIR / "smart_play_summary.json").exists(),
         "validation_ready": (VALIDATION_DIR / "summary.json").exists(),
     }
+
+
+@app.get("/ready")
+def ready(response: Response) -> dict[str, Any]:
+    checks: dict[str, Any] = {
+        "repository": type(repository).__name__,
+        "repository_reachable": False,
+        "data_loaded": False,
+        "validation_loaded": False,
+        "counts": {},
+        "errors": [],
+    }
+    try:
+        validation = repository.validation_summary()
+        counts = validation.get("counts", {}).get("records", {})
+        checks["repository_reachable"] = True
+        checks["validation_loaded"] = True
+        checks["counts"] = counts
+        checks["data_loaded"] = all(int(counts.get(key, 0)) > 0 for key in ["items", "maps", "monsters", "quests"])
+    except Exception as error:  # Readiness should report dependency failures, not hide them.
+        checks["errors"].append(str(error))
+
+    checks["status"] = "ready" if checks["repository_reachable"] and checks["data_loaded"] else "not_ready"
+    if checks["status"] != "ready":
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    return checks
 
 
 @app.get("/validation/summary")

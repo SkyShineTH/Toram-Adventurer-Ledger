@@ -6,10 +6,47 @@ A data warehouse and AI recommendation system (RAG) for Toram Online, transformi
 
 - Raw Coryn cache lives locally under `data/raw/` and is ignored by Git.
 - Validation runs before processed data generation.
-- Processed JSONL files power a file-backed FastAPI API.
-- A manually scaffolded Next.js frontend shows the Smart Play dashboard and explorer.
+- Processed JSONL files can be loaded into PostgreSQL/pgvector.
+- FastAPI can run against JSONL or PostgreSQL through the repository layer.
+- Next.js provides dashboard, explorer, quality, recommendations, and search pages.
 
-## Local Workflow
+## Full-Stack Docker Workflow
+
+Create local environment settings:
+
+```bash
+cp .env.example .env
+```
+
+Place Coryn/raw API cache files under `data/raw/`. Raw files stay local-only and are ignored by Git.
+
+Start PostgreSQL:
+
+```bash
+docker compose up -d postgres
+```
+
+Run validation, processed-data generation, and PostgreSQL loading:
+
+```bash
+docker compose run --rm loader --allow-findings
+```
+
+Start the app:
+
+```bash
+docker compose up -d backend frontend
+```
+
+Open:
+
+- Frontend: `http://localhost:3000`
+- Backend health: `http://localhost:8000/health`
+- Backend readiness: `http://localhost:8000/ready`
+
+Use `docker compose up -d postgres backend frontend` after the database has already been loaded.
+
+## Local Non-Docker Workflow
 
 Generate validation reports:
 
