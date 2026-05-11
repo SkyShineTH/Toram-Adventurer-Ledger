@@ -40,7 +40,7 @@ def filter_rows(
     filtered = rows
     if query:
         needle = query.casefold()
-        filtered = [row for row in rows if needle in json.dumps(row, ensure_ascii=False).casefold()]
+        filtered = [row for row in rows if needle in json.dumps(row, ensure_ascii=False, default=str).casefold()]
     total = len(filtered)
     return {"total": total, "limit": limit, "offset": offset, "items": filtered[offset : offset + limit]}
 
