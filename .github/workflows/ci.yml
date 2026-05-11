@@ -18,6 +18,11 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r backend/requirements.txt -r scripts/requirements.txt
+
       - name: Ensure raw cache is not tracked
         run: |
           tracked_raw="$(git ls-files data/raw | grep -v '^data/raw/README.md$' || true)"
@@ -29,7 +34,7 @@ jobs:
 
       - name: Compile Python scripts
         run: |
-          python -m py_compile backend/main.py scripts/01_extract_and_clean.py scripts/02_validate_raw_data.py
+          python -m py_compile backend/main.py backend/repositories.py backend/graph.py scripts/01_extract_and_clean.py scripts/02_validate_raw_data.py scripts/03_load_postgres.py
 
       - name: Run validator against synthetic fixture
         run: |
@@ -38,6 +43,72 @@ jobs:
       - name: Run unit tests
         run: |
           python -m unittest discover -s tests
+
+  postgres-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: toram_ledger
+          POSTGRES_USER: toram
+          POSTGRES_PASSWORD: toram_local_password
+        options: >-
+          --health-cmd "pg_isready -U toram -d toram_ledger"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgresql://toram:toram_local_password@localhost:5432/toram_ledger
+      LEDGER_REPOSITORY: postgres
+      PGPASSWORD: toram_local_password
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r backend/requirements.txt -r scripts/requirements.txt
+
+      - name: Initialize pgvector schema
+        run: |
+          psql -h localhost -U toram -d toram_ledger -f database/init/00_enable_extensions.sql
+          psql -h localhost -U toram -d toram_ledger -f database/schema/001_initial_schema.sql
+
+      - name: Generate fixture processed data
+        run: |
+          python scripts/01_extract_and_clean.py --raw-dir tests/fixtures/raw_sample --out-dir data/processed
+
+      - name: Load fixture data into PostgreSQL
+        run: |
+          python scripts/03_load_postgres.py --skip-etl
+
+      - name: Smoke test Postgres repository
+        run: |
+          python - <<'PY'
+          from fastapi.testclient import TestClient
+          from backend.main import app
+
+          client = TestClient(app)
+          health = client.get("/health").json()
+          assert health["repository"] == "PostgresLedgerRepository", health
+          assert client.get("/items?limit=1").json()["items"]
+          assert client.get("/graph/summary").json()["nodes"] > 0
+          assert client.get("/search?q=Soft&limit=1").json()["items"]
+          PY
 
   frontend-build:
     runs-on: ubuntu-latest
