@@ -109,7 +109,13 @@ jobs:
           client = TestClient(app)
           health = client.get("/health").json()
           assert health["repository"] == "PostgresLedgerRepository", health
+          ready = client.get("/ready").json()
+          assert ready["status"] == "ready", ready
           assert client.get("/items?limit=1").json()["items"]
+          assert client.get("/items?limit=1&offset=0").json()["items"]
+          assert client.get("/items/1").json()["id"] == 1
+          assert client.get("/monsters/100").json()["id"] == 100
+          assert client.get("/quests/200").json()["id"] == 200
           assert client.get("/graph/summary").json()["nodes"] > 0
           assert client.get("/search?q=Sample&limit=1").json()["items"]
           assert client.get("/side-quests/recommendations?player_level=50&limit=1").json()["items"]
