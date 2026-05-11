@@ -2,6 +2,9 @@
 
 File-backed FastAPI API for the Smart Play MVP.
 
+Routes use the repository abstraction in `backend/repositories.py`. See `docs/backend-data-access.md`
+for the PostgreSQL migration direction.
+
 Before running the API, generate processed data:
 
 ```bash

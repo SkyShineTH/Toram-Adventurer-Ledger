@@ -1,17 +1,19 @@
 from __future__ import annotations
 
-import json
-from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from backend.repositories import JsonLedgerRepository, LedgerRepository, MissingGeneratedFileError
 
 
 ROOT = Path(__file__).resolve().parents[1]
 PROCESSED_DIR = ROOT / "data" / "processed"
 VALIDATION_DIR = ROOT / "reports" / "validation"
+repository: LedgerRepository = JsonLedgerRepository(PROCESSED_DIR, VALIDATION_DIR)
 
 app = FastAPI(title="Toram Adventurer Ledger API")
 app.add_middleware(
@@ -22,29 +24,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-def read_json(path: Path) -> Any:
-    if not path.exists():
-        raise HTTPException(status_code=404, detail=f"Missing generated file: {path.name}")
-    with path.open("r", encoding="utf-8") as handle:
-        return json.load(handle)
-
-
-def read_jsonl(path: Path) -> list[dict[str, Any]]:
-    if not path.exists():
-        raise HTTPException(status_code=404, detail=f"Missing generated file: {path.name}")
-    rows: list[dict[str, Any]] = []
-    with path.open("r", encoding="utf-8") as handle:
-        for line in handle:
-            line = line.strip()
-            if line:
-                rows.append(json.loads(line))
-    return rows
-
-
-@lru_cache(maxsize=16)
-def load_dataset(name: str) -> list[dict[str, Any]]:
-    return read_jsonl(PROCESSED_DIR / f"{name}.jsonl")
+@app.exception_handler(MissingGeneratedFileError)
+def missing_generated_file_handler(_request: Any, exc: MissingGeneratedFileError) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": f"Missing generated file: {exc.path.name}"})
 
 
 def filter_rows(
@@ -81,19 +63,19 @@ def health() -> dict[str, Any]:
 
 @app.get("/validation/summary")
 def validation_summary() -> dict[str, Any]:
-    return read_json(VALIDATION_DIR / "summary.json")
+    return repository.validation_summary()
 
 
 @app.get("/validation/findings")
 def validation_findings(limit: int = 50, offset: int = 0) -> dict[str, Any]:
-    rows = read_jsonl(VALIDATION_DIR / "dead_letter.jsonl")
+    rows = repository.validation_findings()
     total = len(rows)
     return {"total": total, "limit": limit, "offset": offset, "items": rows[offset : offset + limit]}
 
 
 @app.get("/dashboard/smart-play")
 def smart_play_dashboard() -> dict[str, Any]:
-    return read_json(PROCESSED_DIR / "smart_play_summary.json")
+    return repository.smart_play_summary()
 
 
 @app.get("/items")
@@ -105,7 +87,7 @@ def items(
     limit: int = 50,
     offset: int = 0,
 ) -> dict[str, Any]:
-    rows = load_dataset("items")
+    rows = repository.dataset("items")
     if type_label:
         rows = [row for row in rows if text_matches(row.get("type_label"), type_label)]
     if min_sell is not None:
@@ -117,7 +99,7 @@ def items(
 
 @app.get("/items/{item_id}")
 def item_detail(item_id: int) -> dict[str, Any]:
-    for item in load_dataset("items"):
+    for item in repository.dataset("items"):
         if item.get("id") == item_id:
             return item
     raise HTTPException(status_code=404, detail="Item not found")
@@ -125,7 +107,7 @@ def item_detail(item_id: int) -> dict[str, Any]:
 
 @app.get("/maps")
 def maps(q: str | None = None, limit: int = 50, offset: int = 0) -> dict[str, Any]:
-    return filter_rows(load_dataset("maps"), query=q, limit=limit, offset=offset)
+    return filter_rows(repository.dataset("maps"), query=q, limit=limit, offset=offset)
 
 
 @app.get("/monsters")
@@ -139,7 +121,7 @@ def monsters(
     limit: int = 50,
     offset: int = 0,
 ) -> dict[str, Any]:
-    rows = load_dataset("monsters")
+    rows = repository.dataset("monsters")
     if type_label:
         rows = [row for row in rows if text_matches(row.get("type_label"), type_label)]
     if element_label:
@@ -164,7 +146,7 @@ def quests(
     limit: int = 50,
     offset: int = 0,
 ) -> dict[str, Any]:
-    rows = load_dataset("quests")
+    rows = repository.dataset("quests")
     if quest_type:
         rows = [row for row in rows if text_matches(row.get("type"), quest_type)]
     if npc_name:
@@ -180,7 +162,7 @@ def quests(
 
 @app.get("/relationships/item/{item_id}/quests")
 def quests_for_item(item_id: int) -> dict[str, Any]:
-    objective_rows = [row for row in load_dataset("quest_objectives") if row.get("target_item_id") == item_id]
+    objective_rows = [row for row in repository.dataset("quest_objectives") if row.get("target_item_id") == item_id]
     quest_ids = {row.get("quest_id") for row in objective_rows}
-    quest_rows = [row for row in load_dataset("quests") if row.get("id") in quest_ids]
+    quest_rows = [row for row in repository.dataset("quests") if row.get("id") in quest_ids]
     return {"item_id": item_id, "objectives": objective_rows, "quests": quest_rows}
