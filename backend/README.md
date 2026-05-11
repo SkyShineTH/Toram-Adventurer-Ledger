@@ -30,6 +30,7 @@ Key endpoints:
 - `GET /graph/items/{item_id}/quest-paths?limit=`
 - `GET /recommendations/quests?player_level=&limit=`
 - `GET /recommendations/leveling?player_level=&window=&limit=`
+- `GET /search?q=&entity_type=&limit=`
 - `GET /items?q=&type_label=&min_sell=&max_sell=`
 - `GET /maps`
 - `GET /monsters?q=&type_label=&element_label=&min_level=&max_level=&map_id=`

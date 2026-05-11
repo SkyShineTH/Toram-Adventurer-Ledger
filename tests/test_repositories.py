@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from backend.repositories import JsonLedgerRepository, PostgresLedgerRepository, create_repository
+from backend.repositories import JsonLedgerRepository, PostgresLedgerRepository, create_repository, rank_documents
 
 
 class RepositoryFactoryTests(unittest.TestCase):
@@ -27,6 +27,19 @@ class RepositoryFactoryTests(unittest.TestCase):
             repository = create_repository(Path("processed"), Path("validation"))
 
         self.assertIsInstance(repository, PostgresLedgerRepository)
+
+
+class SearchRankingTests(unittest.TestCase):
+    def test_rank_documents_filters_entity_type(self) -> None:
+        documents = [
+            {"title": "Soft Fur", "content": "Soft Fur material", "entity_type": "item"},
+            {"title": "Warm Coat", "content": "Collect Soft Fur", "entity_type": "quest"},
+        ]
+
+        results = rank_documents(documents, "soft fur", entity_type="quest", limit=10)
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["title"], "Warm Coat")
 
 
 if __name__ == "__main__":

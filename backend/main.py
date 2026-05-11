@@ -115,6 +115,16 @@ def recommended_leveling(player_level: int, window: int = 10, limit: int = 10) -
     }
 
 
+@app.get("/search")
+def search(q: str, entity_type: str | None = None, limit: int = 10) -> dict[str, Any]:
+    return {
+        "query": q,
+        "entity_type": entity_type,
+        "mode": "lexical",
+        "items": repository.search_documents(q, entity_type=entity_type, limit=limit),
+    }
+
+
 @app.get("/items")
 def items(
     q: str | None = None,
