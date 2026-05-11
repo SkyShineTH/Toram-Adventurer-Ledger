@@ -1,20 +1,13 @@
 import Link from "next/link";
+import { type ApiList, fetchApi } from "../../lib/api";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
-
-type ApiList<T> = { total: number; items: T[] };
 type Item = { id: number; name: string; type_label: string | null; sell: number | null };
 type Monster = { id: number; name: string; level: number | null; map_name: string | null; element_label: string | null; exp: number | null };
 type Quest = { id: number; title: string; level_required: number | null; exp_reward: number | null; npc_name: string | null };
 
 async function fetchList<T>(path: string): Promise<ApiList<T>> {
-  try {
-    const response = await fetch(`${API_BASE}${path}`, { next: { revalidate: 30 } });
-    if (!response.ok) return { total: 0, items: [] };
-    return response.json();
-  } catch {
-    return { total: 0, items: [] };
-  }
+  const result = await fetchApi<ApiList<T>>(path);
+  return result.ok ? result.data : { total: 0, limit: 0, offset: 0, items: [] };
 }
 
 export default async function Explorer() {
@@ -63,4 +56,3 @@ function ExplorerColumn({ title, total, rows }: { title: string; total: number; 
     </article>
   );
 }
-

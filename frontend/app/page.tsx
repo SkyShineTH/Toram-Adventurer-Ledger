@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
+import { API_BASE_URL, fetchApi } from "../lib/api";
 
 type SmartSummary = {
   counts: Record<string, number>;
@@ -16,13 +15,8 @@ type SmartSummary = {
 };
 
 async function getSummary(): Promise<SmartSummary | null> {
-  try {
-    const response = await fetch(`${API_BASE}/dashboard/smart-play`, { next: { revalidate: 30 } });
-    if (!response.ok) return null;
-    return response.json();
-  } catch {
-    return null;
-  }
+  const result = await fetchApi<SmartSummary>("/dashboard/smart-play");
+  return result.ok ? result.data : null;
 }
 
 export default async function Home() {
@@ -42,7 +36,7 @@ export default async function Home() {
           </p>
           <div className="actions">
             <Link href="/explorer" className="primaryLink">Open Explorer</Link>
-            <a href={`${API_BASE}/health`} className="ghostLink">API Health</a>
+            <a href={`${API_BASE_URL}/health`} className="ghostLink">API Health</a>
           </div>
         </div>
         <aside className="statusPanel">
