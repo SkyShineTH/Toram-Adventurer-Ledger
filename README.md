@@ -49,7 +49,7 @@ docker compose run --rm loader --allow-findings
 Start backend and frontend:
 
 ```powershell
-docker compose up -d backend frontend
+docker compose up -d --build backend frontend
 ```
 
 Open:
@@ -64,6 +64,12 @@ After the database is already loaded, this is enough for normal startup:
 docker compose up -d postgres backend frontend
 ```
 
+If frontend or backend routes look stale after code changes, rebuild the app images:
+
+```powershell
+docker compose up -d --build backend frontend
+```
+
 ## Reset Local Database
 
 This removes the local PostgreSQL Docker volume. Raw files remain untouched.
@@ -72,7 +78,7 @@ This removes the local PostgreSQL Docker volume. Raw files remain untouched.
 docker compose down -v
 docker compose up -d postgres
 docker compose run --rm loader --allow-findings
-docker compose up -d backend frontend
+docker compose up -d --build backend frontend
 ```
 
 ## Local Non-Docker Workflow
