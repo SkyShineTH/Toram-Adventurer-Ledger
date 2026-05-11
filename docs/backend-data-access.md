@@ -14,10 +14,9 @@ The FastAPI routes depend on the `LedgerRepository` protocol in `backend/reposit
 Recommended next storage steps:
 
 1. Keep JSONL as the local MVP source until the schema stabilizes.
-2. Add a `PostgresLedgerRepository` that implements the same `LedgerRepository` protocol.
-3. Load validated processed rows into the schema under `database/schema/001_initial_schema.sql`.
-4. Switch repository construction with an environment variable such as `LEDGER_REPOSITORY=postgres`.
-5. Use the local Docker Compose stack when contributors need a shared PostgreSQL/pgvector runtime.
+2. Load validated processed rows into the schema under `database/schema/001_initial_schema.sql`.
+3. Switch repository construction with `LEDGER_REPOSITORY=postgres`.
+4. Use the local Docker Compose stack when contributors need a shared PostgreSQL/pgvector runtime.
 
-Docker is available for PostgreSQL, but the backend still defaults to JSONL until a `PostgresLedgerRepository`
-and loader are implemented.
+Docker is available for PostgreSQL, but the backend still defaults to JSONL until `LEDGER_REPOSITORY=postgres`
+is explicitly set.

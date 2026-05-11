@@ -5,6 +5,9 @@ File-backed FastAPI API for the Smart Play MVP.
 Routes use the repository abstraction in `backend/repositories.py`. See `docs/backend-data-access.md`
 for the PostgreSQL migration direction.
 
+Set `LEDGER_REPOSITORY=postgres` with `DATABASE_URL` to read from PostgreSQL after loading data.
+The default remains `LEDGER_REPOSITORY=json` for local MVP work without Docker.
+
 Before running the API, generate processed data:
 
 ```bash

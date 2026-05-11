@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -7,13 +8,13 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.repositories import JsonLedgerRepository, LedgerRepository, MissingGeneratedFileError
+from backend.repositories import LedgerRepository, MissingGeneratedFileError, create_repository
 
 
 ROOT = Path(__file__).resolve().parents[1]
 PROCESSED_DIR = ROOT / "data" / "processed"
 VALIDATION_DIR = ROOT / "reports" / "validation"
-repository: LedgerRepository = JsonLedgerRepository(PROCESSED_DIR, VALIDATION_DIR)
+repository: LedgerRepository = create_repository(PROCESSED_DIR, VALIDATION_DIR)
 
 app = FastAPI(title="Toram Adventurer Ledger API")
 app.add_middleware(
@@ -56,6 +57,7 @@ def text_matches(value: Any, expected: str | None) -> bool:
 def health() -> dict[str, Any]:
     return {
         "status": "ok",
+        "repository": type(repository).__name__,
         "processed_data_ready": (PROCESSED_DIR / "smart_play_summary.json").exists(),
         "validation_ready": (VALIDATION_DIR / "summary.json").exists(),
     }
