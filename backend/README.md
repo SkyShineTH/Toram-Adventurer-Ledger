@@ -1,6 +1,6 @@
 # Backend
 
-File-backed FastAPI API for the Milestone 6 MVP.
+File-backed FastAPI API for the Smart Play MVP.
 
 Before running the API, generate processed data:
 
@@ -19,8 +19,8 @@ Key endpoints:
 - `GET /health`
 - `GET /validation/summary`
 - `GET /dashboard/smart-play`
-- `GET /items`
+- `GET /items?q=&type_label=&min_sell=&max_sell=`
 - `GET /maps`
-- `GET /monsters`
-- `GET /quests`
-
+- `GET /monsters?q=&type_label=&element_label=&min_level=&max_level=&map_id=`
+- `GET /quests?q=&quest_type=&npc_name=&min_level=&max_level=&min_exp=`
+- `GET /relationships/item/{item_id}/quests`

@@ -62,6 +62,14 @@ def filter_rows(
     return {"total": total, "limit": limit, "offset": offset, "items": filtered[offset : offset + limit]}
 
 
+def text_matches(value: Any, expected: str | None) -> bool:
+    if not expected:
+        return True
+    if value is None:
+        return False
+    return expected.casefold() in str(value).casefold()
+
+
 @app.get("/health")
 def health() -> dict[str, Any]:
     return {
@@ -82,8 +90,22 @@ def smart_play_dashboard() -> dict[str, Any]:
 
 
 @app.get("/items")
-def items(q: str | None = None, limit: int = 50, offset: int = 0) -> dict[str, Any]:
-    return filter_rows(load_dataset("items"), query=q, limit=limit, offset=offset)
+def items(
+    q: str | None = None,
+    type_label: str | None = None,
+    min_sell: int | None = None,
+    max_sell: int | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> dict[str, Any]:
+    rows = load_dataset("items")
+    if type_label:
+        rows = [row for row in rows if text_matches(row.get("type_label"), type_label)]
+    if min_sell is not None:
+        rows = [row for row in rows if isinstance(row.get("sell"), int) and row["sell"] >= min_sell]
+    if max_sell is not None:
+        rows = [row for row in rows if isinstance(row.get("sell"), int) and row["sell"] <= max_sell]
+    return filter_rows(rows, query=q, limit=limit, offset=offset)
 
 
 @app.get("/items/{item_id}")
@@ -102,6 +124,8 @@ def maps(q: str | None = None, limit: int = 50, offset: int = 0) -> dict[str, An
 @app.get("/monsters")
 def monsters(
     q: str | None = None,
+    type_label: str | None = None,
+    element_label: str | None = None,
     min_level: int | None = None,
     max_level: int | None = None,
     map_id: int | None = None,
@@ -109,6 +133,10 @@ def monsters(
     offset: int = 0,
 ) -> dict[str, Any]:
     rows = load_dataset("monsters")
+    if type_label:
+        rows = [row for row in rows if text_matches(row.get("type_label"), type_label)]
+    if element_label:
+        rows = [row for row in rows if text_matches(row.get("element_label"), element_label)]
     if min_level is not None:
         rows = [row for row in rows if isinstance(row.get("level"), int) and row["level"] >= min_level]
     if max_level is not None:
@@ -119,8 +147,28 @@ def monsters(
 
 
 @app.get("/quests")
-def quests(q: str | None = None, limit: int = 50, offset: int = 0) -> dict[str, Any]:
-    return filter_rows(load_dataset("quests"), query=q, limit=limit, offset=offset)
+def quests(
+    q: str | None = None,
+    quest_type: str | None = None,
+    npc_name: str | None = None,
+    min_level: int | None = None,
+    max_level: int | None = None,
+    min_exp: int | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> dict[str, Any]:
+    rows = load_dataset("quests")
+    if quest_type:
+        rows = [row for row in rows if text_matches(row.get("type"), quest_type)]
+    if npc_name:
+        rows = [row for row in rows if text_matches(row.get("npc_name"), npc_name)]
+    if min_level is not None:
+        rows = [row for row in rows if isinstance(row.get("level_required"), int) and row["level_required"] >= min_level]
+    if max_level is not None:
+        rows = [row for row in rows if isinstance(row.get("level_required"), int) and row["level_required"] <= max_level]
+    if min_exp is not None:
+        rows = [row for row in rows if isinstance(row.get("exp_reward"), int) and row["exp_reward"] >= min_exp]
+    return filter_rows(rows, query=q, limit=limit, offset=offset)
 
 
 @app.get("/relationships/item/{item_id}/quests")
