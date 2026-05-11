@@ -7,6 +7,7 @@ for the PostgreSQL migration direction.
 
 Set `LEDGER_REPOSITORY=postgres` with `DATABASE_URL` to read from PostgreSQL after loading data.
 The default remains `LEDGER_REPOSITORY=json` for local MVP work without Docker.
+Local `.env` values are loaded from the repo root. Existing shell environment variables take precedence.
 
 Before running the API, generate processed data:
 

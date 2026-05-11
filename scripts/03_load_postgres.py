@@ -7,11 +7,14 @@ import os
 from pathlib import Path
 from typing import Any, Iterable
 
+from dotenv import load_dotenv
+
 
 ROOT = Path(__file__).resolve().parents[1]
 ETL_PATH = ROOT / "scripts" / "01_extract_and_clean.py"
 PROCESSED_DIR = ROOT / "data" / "processed"
 VALIDATION_DIR = ROOT / "reports" / "validation"
+load_dotenv(ROOT / ".env", override=False)
 
 
 def load_etl_module():

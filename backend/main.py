@@ -8,6 +8,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from backend.config import load_project_env
 from backend.graph import (
     build_ledger_graph,
     graph_summary,
@@ -21,6 +22,7 @@ from backend.repositories import LedgerRepository, MissingGeneratedFileError, cr
 ROOT = Path(__file__).resolve().parents[1]
 PROCESSED_DIR = ROOT / "data" / "processed"
 VALIDATION_DIR = ROOT / "reports" / "validation"
+load_project_env()
 repository: LedgerRepository = create_repository(PROCESSED_DIR, VALIDATION_DIR)
 
 app = FastAPI(title="Toram Adventurer Ledger API")

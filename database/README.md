@@ -26,10 +26,12 @@ The compose stack reads these local-only variables:
 ```bash
 POSTGRES_DB=toram_ledger
 POSTGRES_USER=toram
-POSTGRES_PASSWORD=change-me-local-only
+POSTGRES_PASSWORD=toram_local_password
 POSTGRES_PORT=5432
-DATABASE_URL=postgresql://toram:change-me-local-only@localhost:5432/toram_ledger
+DATABASE_URL=postgresql://toram:toram_local_password@localhost:5432/toram_ledger
 ```
+
+Backend and loader commands read `.env` from the repo root. Shell variables still override `.env` when both are set.
 
 Initialization scripts under `database/init/` run only when the Docker volume is first created. If the schema changes and
 you need a fresh local database, remove the `toram_postgres_data` volume intentionally after confirming there is no local
