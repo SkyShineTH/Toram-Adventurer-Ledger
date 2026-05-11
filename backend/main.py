@@ -17,6 +17,7 @@ from backend.graph import (
     quest_recommendations,
 )
 from backend.repositories import LedgerRepository, MissingGeneratedFileError, create_repository
+from backend.side_quests import side_quest_recommendations
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -140,6 +141,15 @@ def recommended_leveling(player_level: int, window: int = 10, limit: int = 10) -
         "player_level": player_level,
         "window": window,
         "items": leveling_recommendations(repository, player_level, window=window, limit=limit),
+    }
+
+
+@app.get("/side-quests/recommendations")
+def recommended_side_quests(player_level: int, goal: str = "balanced", limit: int = 10) -> dict[str, Any]:
+    return {
+        "player_level": player_level,
+        "goal": goal,
+        "items": side_quest_recommendations(repository, player_level=player_level, goal=goal, limit=limit),
     }
 
 

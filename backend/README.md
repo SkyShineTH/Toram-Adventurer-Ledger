@@ -32,9 +32,15 @@ Key endpoints:
 - `GET /graph/items/{item_id}/quest-paths?limit=`
 - `GET /recommendations/quests?player_level=&limit=`
 - `GET /recommendations/leveling?player_level=&window=&limit=`
+- `GET /side-quests/recommendations?player_level=&goal=balanced|exp|item_collection&limit=`
 - `GET /search?q=&entity_type=&limit=`
 - `GET /items?q=&type_label=&min_sell=&max_sell=`
 - `GET /maps`
 - `GET /monsters?q=&type_label=&element_label=&min_level=&max_level=&map_id=`
 - `GET /quests?q=&quest_type=&npc_name=&min_level=&max_level=&min_exp=`
 - `GET /relationships/item/{item_id}/quests`
+
+`/side-quests/recommendations` returns ranked quest candidates with `required_items`,
+`npc_name`, `exp_per_objective`, `score`, and a short `reason`. The route only ranks
+quests available at or below `player_level`; it does not invent requirements that are
+not present in validated quest objective data.

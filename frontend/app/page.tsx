@@ -36,6 +36,7 @@ export default async function Home() {
           </p>
           <div className="actions">
             <Link href="/explorer" className="primaryLink">Open Explorer</Link>
+            <Link href="/side-quests" className="ghostLink">Side Quests</Link>
             <Link href="/recommendations" className="ghostLink">Recommendations</Link>
             <Link href="/search" className="ghostLink">Search</Link>
             <Link href="/quality" className="ghostLink">Data Quality</Link>
