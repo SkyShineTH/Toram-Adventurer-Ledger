@@ -18,6 +18,7 @@ Key endpoints:
 
 - `GET /health`
 - `GET /validation/summary`
+- `GET /validation/findings?limit=&offset=`
 - `GET /dashboard/smart-play`
 - `GET /items?q=&type_label=&min_sell=&max_sell=`
 - `GET /maps`

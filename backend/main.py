@@ -84,6 +84,13 @@ def validation_summary() -> dict[str, Any]:
     return read_json(VALIDATION_DIR / "summary.json")
 
 
+@app.get("/validation/findings")
+def validation_findings(limit: int = 50, offset: int = 0) -> dict[str, Any]:
+    rows = read_jsonl(VALIDATION_DIR / "dead_letter.jsonl")
+    total = len(rows)
+    return {"total": total, "limit": limit, "offset": offset, "items": rows[offset : offset + limit]}
+
+
 @app.get("/dashboard/smart-play")
 def smart_play_dashboard() -> dict[str, Any]:
     return read_json(PROCESSED_DIR / "smart_play_summary.json")
