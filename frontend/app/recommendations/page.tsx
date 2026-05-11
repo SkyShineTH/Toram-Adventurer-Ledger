@@ -66,6 +66,7 @@ export default async function RecommendationsPage({ searchParams }: { searchPara
       <nav className="topNav">
         <Link href="/">Dashboard</Link>
         <Link href="/explorer">Explorer</Link>
+        <Link href="/profile">Profile</Link>
         <Link href="/side-quests">Side Quests</Link>
         <Link href="/quality">Data Quality</Link>
         <span>Recommendations</span>

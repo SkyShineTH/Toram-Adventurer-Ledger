@@ -223,6 +223,13 @@ h2 {
   margin-top: 18px;
 }
 
+.profileGrid {
+  display: grid;
+  grid-template-columns: 0.7fr 1.3fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+
 .detailGrid {
   display: grid;
   grid-template-columns: 0.78fr 1.22fr;
@@ -395,7 +402,29 @@ h2 {
   background: rgba(248, 240, 220, 0.62);
 }
 
+.profileForm {
+  display: grid;
+  grid-template-columns: 120px 1fr 140px 180px 170px auto;
+  gap: 12px;
+  align-items: end;
+  margin: 28px 0 18px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  background: rgba(248, 240, 220, 0.62);
+}
+
 .searchForm label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-family: "Trebuchet MS", sans-serif;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.profileForm label {
   display: grid;
   gap: 6px;
   color: var(--muted);
@@ -415,7 +444,27 @@ h2 {
   font: 1rem Georgia, "Times New Roman", serif;
 }
 
+.profileForm input,
+.profileForm select {
+  min-width: 0;
+  border: 1px solid var(--line);
+  padding: 11px 12px;
+  color: var(--ink);
+  background: rgba(248, 240, 220, 0.84);
+  font: 1rem Georgia, "Times New Roman", serif;
+}
+
 .searchForm button {
+  border: 1px solid var(--ink);
+  padding: 11px 14px;
+  color: var(--paper);
+  background: var(--ink);
+  font-family: "Trebuchet MS", sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.profileForm button {
   border: 1px solid var(--ink);
   padding: 11px 14px;
   color: var(--paper);
@@ -602,6 +651,28 @@ h2 {
   padding-left: 18px;
 }
 
+.profileActionList {
+  display: grid;
+  gap: 14px;
+}
+
+.profileAction {
+  display: grid;
+  gap: 8px;
+  padding: 16px 0;
+  border-top: 1px dashed var(--line);
+  text-decoration: none;
+}
+
+.profileAction strong {
+  font-size: 1.24rem;
+}
+
+.profileAction span {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
 .detailNote {
   margin-top: 20px;
   font-size: 1rem;
@@ -653,6 +724,7 @@ h2 {
   .qualityGrid,
   .recommendationGrid,
   .questHelperGrid,
+  .profileGrid,
   .detailGrid,
   .detailMetrics {
     grid-template-columns: 1fr;
@@ -662,7 +734,8 @@ h2 {
     transform: none;
   }
 
-  .searchForm {
+  .searchForm,
+  .profileForm {
     grid-template-columns: 1fr;
   }
 }
