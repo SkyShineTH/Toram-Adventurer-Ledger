@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: toram-ledger-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-toram_ledger}
+      POSTGRES_USER: ${POSTGRES_USER:-toram}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-toram_local_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - toram_postgres_data:/var/lib/postgresql/data
+      - ./database:/database:ro
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  toram_postgres_data:
