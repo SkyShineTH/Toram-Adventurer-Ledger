@@ -26,6 +26,10 @@ Key endpoints:
 - `GET /validation/summary`
 - `GET /validation/findings?limit=&offset=`
 - `GET /dashboard/smart-play`
+- `GET /graph/summary`
+- `GET /graph/items/{item_id}/quest-paths?limit=`
+- `GET /recommendations/quests?player_level=&limit=`
+- `GET /recommendations/leveling?player_level=&window=&limit=`
 - `GET /items?q=&type_label=&min_sell=&max_sell=`
 - `GET /maps`
 - `GET /monsters?q=&type_label=&element_label=&min_level=&max_level=&map_id=`

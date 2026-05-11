@@ -8,6 +8,13 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from backend.graph import (
+    build_ledger_graph,
+    graph_summary,
+    item_quest_paths,
+    leveling_recommendations,
+    quest_recommendations,
+)
 from backend.repositories import LedgerRepository, MissingGeneratedFileError, create_repository
 
 
@@ -53,6 +60,10 @@ def text_matches(value: Any, expected: str | None) -> bool:
     return expected.casefold() in str(value).casefold()
 
 
+def current_graph():
+    return build_ledger_graph(repository)
+
+
 @app.get("/health")
 def health() -> dict[str, Any]:
     return {
@@ -78,6 +89,30 @@ def validation_findings(limit: int = 50, offset: int = 0) -> dict[str, Any]:
 @app.get("/dashboard/smart-play")
 def smart_play_dashboard() -> dict[str, Any]:
     return repository.smart_play_summary()
+
+
+@app.get("/graph/summary")
+def graph_overview() -> dict[str, Any]:
+    return graph_summary(current_graph())
+
+
+@app.get("/graph/items/{item_id}/quest-paths")
+def graph_item_quest_paths(item_id: int, limit: int = 10) -> dict[str, Any]:
+    return {"item_id": item_id, "paths": item_quest_paths(current_graph(), item_id, limit=limit)}
+
+
+@app.get("/recommendations/quests")
+def recommended_quests(player_level: int, limit: int = 10) -> dict[str, Any]:
+    return {"player_level": player_level, "items": quest_recommendations(repository, player_level, limit=limit)}
+
+
+@app.get("/recommendations/leveling")
+def recommended_leveling(player_level: int, window: int = 10, limit: int = 10) -> dict[str, Any]:
+    return {
+        "player_level": player_level,
+        "window": window,
+        "items": leveling_recommendations(repository, player_level, window=window, limit=limit),
+    }
 
 
 @app.get("/items")
