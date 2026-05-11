@@ -185,7 +185,8 @@ h2 {
 
 .dashboardGrid,
 .tripleGrid,
-.qualityGrid {
+.qualityGrid,
+.recommendationGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
@@ -199,6 +200,11 @@ h2 {
 .qualityGrid {
   grid-template-columns: 1.2fr 1fr 1fr;
   margin: 36px 0 18px;
+}
+
+.recommendationGrid {
+  grid-template-columns: 0.8fr 1.2fr;
+  margin-top: 18px;
 }
 
 .ledgerBlock {
@@ -312,6 +318,47 @@ h2 {
   background: var(--ink);
 }
 
+.levelForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+  margin: 28px 0 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  background: rgba(248, 240, 220, 0.62);
+}
+
+.levelForm label {
+  display: grid;
+  gap: 6px;
+  min-width: 220px;
+  color: var(--muted);
+  font-family: "Trebuchet MS", sans-serif;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.levelForm input {
+  border: 1px solid var(--line);
+  padding: 11px 12px;
+  color: var(--ink);
+  background: rgba(248, 240, 220, 0.84);
+  font: 1rem Georgia, "Times New Roman", serif;
+}
+
+.levelForm button {
+  border: 1px solid var(--ink);
+  padding: 11px 14px;
+  color: var(--paper);
+  background: var(--ink);
+  font-family: "Trebuchet MS", sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .emptyState {
   margin: 0;
   padding: 18px 0;
@@ -373,12 +420,40 @@ h2 {
   color: var(--muted);
 }
 
+.routeList {
+  display: grid;
+  gap: 14px;
+}
+
+.routeCard {
+  padding: 14px 0;
+  border-top: 1px dashed var(--line);
+}
+
+.routeCard div {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.routeCard span,
+.routeCard li {
+  color: var(--muted);
+}
+
+.routeCard ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  line-height: 1.7;
+}
+
 @media (max-width: 860px) {
   .hero,
   .metricRow,
   .dashboardGrid,
   .tripleGrid,
-  .qualityGrid {
+  .qualityGrid,
+  .recommendationGrid {
     grid-template-columns: 1fr;
   }
 

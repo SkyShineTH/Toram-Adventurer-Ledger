@@ -36,6 +36,7 @@ export default async function Home() {
           </p>
           <div className="actions">
             <Link href="/explorer" className="primaryLink">Open Explorer</Link>
+            <Link href="/recommendations" className="ghostLink">Recommendations</Link>
             <Link href="/quality" className="ghostLink">Data Quality</Link>
             <a href={`${API_BASE_URL}/health`} className="ghostLink">API Health</a>
           </div>
