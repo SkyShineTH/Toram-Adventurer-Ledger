@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { type ApiList, fetchApi } from "../api-client";
 import { entityHref } from "../entity-links";
+import { ApiUnavailableNotice, LoaderRequiredNotice } from "../runtime-state";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -69,9 +70,16 @@ function explorerHref(
   return serialized ? `/explorer?${serialized}` : "/explorer";
 }
 
-async function fetchList<T>(path: string): Promise<ApiList<T>> {
+type ListResult<T> = {
+  data: ApiList<T>;
+  error: string | null;
+};
+
+async function fetchList<T>(path: string): Promise<ListResult<T>> {
   const result = await fetchApi<ApiList<T>>(path);
-  return result.ok ? result.data : { total: 0, limit: LIMIT, offset: 0, items: [] };
+  return result.ok
+    ? { data: result.data, error: null }
+    : { data: { total: 0, limit: LIMIT, offset: 0, items: [] }, error: result.message };
 }
 
 export default async function Explorer({ searchParams }: { searchParams?: SearchParams }) {
@@ -89,7 +97,7 @@ export default async function Explorer({ searchParams }: { searchParams?: Search
   const monsterOffset = parseOffset(firstValue(params.monster_offset));
   const questOffset = parseOffset(firstValue(params.quest_offset));
 
-  const [items, monsters, quests] = await Promise.all([
+  const [itemResult, monsterResult, questResult] = await Promise.all([
     fetchList<Item>(endpoint("/items", { q: itemQ, type_label: itemType, offset: String(itemOffset) })),
     fetchList<Monster>(
       endpoint("/monsters", {
@@ -104,6 +112,13 @@ export default async function Explorer({ searchParams }: { searchParams?: Search
       endpoint("/quests", { q: questQ, npc_name: questNpc, min_exp: questMinExp, offset: String(questOffset) }),
     ),
   ]);
+  const items = itemResult.data;
+  const monsters = monsterResult.data;
+  const quests = questResult.data;
+  const errors = [itemResult.error, monsterResult.error, questResult.error].filter((message): message is string =>
+    Boolean(message),
+  );
+  const hasLoadedData = items.total + monsters.total + quests.total > 0;
 
   return (
     <main className="shell">
@@ -119,6 +134,8 @@ export default async function Explorer({ searchParams }: { searchParams?: Search
           but make validated relationships visible.
         </p>
       </section>
+      {errors.length > 0 ? <ApiUnavailableNotice message={errors[0]} /> : null}
+      {errors.length === 0 && !hasLoadedData ? <LoaderRequiredNotice /> : null}
       <section className="tripleGrid">
         <ExplorerColumn
           title="Items"

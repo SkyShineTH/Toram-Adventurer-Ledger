@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { type ApiList, fetchApi } from "../api-client";
+import { ApiUnavailableNotice } from "../runtime-state";
 
 type ValidationSummary = {
   generated_at: string;
@@ -30,11 +31,12 @@ async function getQualityReport() {
   return {
     summary: summary.ok ? summary.data : null,
     findings: findings.ok ? findings.data : { total: 0, limit: 25, offset: 0, items: [] },
+    error: summary.ok ? (findings.ok ? null : findings.message) : summary.message,
   };
 }
 
 export default async function QualityPage() {
-  const { summary, findings } = await getQualityReport();
+  const { summary, findings, error } = await getQualityReport();
   const errorsByEntity = Object.entries(summary?.counts.errors_by_entity ?? {});
   const errorsByCode = Object.entries(summary?.counts.errors_by_code ?? {});
 
@@ -54,6 +56,8 @@ export default async function QualityPage() {
           findings for contributors without committing generated validation output.
         </p>
       </section>
+
+      {error ? <ApiUnavailableNotice message={error} /> : null}
 
       <section className="qualityGrid">
         <article className="ledgerBlock statusCard">

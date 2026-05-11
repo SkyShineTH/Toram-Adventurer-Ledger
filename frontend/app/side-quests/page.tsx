@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { fetchApi } from "../api-client";
+import { ApiUnavailableNotice, LoaderRequiredNotice } from "../runtime-state";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -39,18 +40,18 @@ function parseGoal(value: string): string {
   return GOALS.some((goal) => goal.value === value) ? value : "balanced";
 }
 
-async function getSideQuests(playerLevel: number, goal: string): Promise<SideQuestRecommendation[]> {
+async function getSideQuests(playerLevel: number, goal: string) {
   const result = await fetchApi<{ items: SideQuestRecommendation[] }>(
     `/side-quests/recommendations?player_level=${playerLevel}&goal=${goal}&limit=8`,
   );
-  return result.ok ? result.data.items : [];
+  return result.ok ? { items: result.data.items, error: null } : { items: [], error: result.message };
 }
 
 export default async function SideQuestsPage({ searchParams }: { searchParams?: SearchParams }) {
   const params = (await searchParams) ?? {};
   const playerLevel = parseLevel(firstValue(params.level));
   const goal = parseGoal(firstValue(params.goal));
-  const quests = await getSideQuests(playerLevel, goal);
+  const { items: quests, error } = await getSideQuests(playerLevel, goal);
 
   return (
     <main className="shell">
@@ -90,6 +91,8 @@ export default async function SideQuestsPage({ searchParams }: { searchParams?: 
         </label>
         <button type="submit">Find quests</button>
       </form>
+
+      {error ? <ApiUnavailableNotice message={error} /> : null}
 
       <section className="questHelperGrid">
         <article className="ledgerBlock statusCard">
@@ -138,7 +141,7 @@ export default async function SideQuestsPage({ searchParams }: { searchParams?: 
               ))}
             </div>
           ) : (
-            <p className="emptyState">No quest candidates found. Check whether the backend has loaded processed data.</p>
+            <>{error ? null : <LoaderRequiredNotice />}</>
           )}
         </article>
       </section>

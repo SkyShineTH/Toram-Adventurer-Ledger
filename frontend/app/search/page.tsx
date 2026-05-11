@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { fetchApi } from "../api-client";
 import { entityHref } from "../entity-links";
+import { ApiUnavailableNotice } from "../runtime-state";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -20,11 +21,11 @@ function firstValue(value: string | string[] | undefined): string {
 }
 
 async function getSearchResults(query: string, entityType: string) {
-  if (!query.trim()) return { mode: "lexical", items: [] as SearchResult[] };
+  if (!query.trim()) return { mode: "lexical", items: [] as SearchResult[], error: null };
   const params = new URLSearchParams({ q: query, limit: "12" });
   if (entityType) params.set("entity_type", entityType);
   const result = await fetchApi<{ mode: string; items: SearchResult[] }>(`/search?${params.toString()}`);
-  return result.ok ? result.data : { mode: "lexical", items: [] };
+  return result.ok ? { ...result.data, error: null } : { mode: "lexical", items: [], error: result.message };
 }
 
 export default async function SearchPage({ searchParams }: { searchParams?: SearchParams }) {
@@ -70,6 +71,8 @@ export default async function SearchPage({ searchParams }: { searchParams?: Sear
         <button type="submit">Search</button>
       </form>
 
+      {results.error ? <ApiUnavailableNotice message={results.error} /> : null}
+
       <section className="ledgerBlock searchResults">
         <div className="sectionHead">
           <p className="eyebrow">{results.mode} retrieval</p>
@@ -96,7 +99,11 @@ export default async function SearchPage({ searchParams }: { searchParams?: Sear
               </article>
             ))
           ) : (
-            <p className="emptyState">Enter a query to search items, maps, monsters, and quests.</p>
+            <p className="emptyState">
+              {query.trim()
+                ? "No records matched this query. Try a broader term or confirm the loader has run."
+                : "Enter a query to search items, maps, monsters, and quests."}
+            </p>
           )}
         </div>
       </section>

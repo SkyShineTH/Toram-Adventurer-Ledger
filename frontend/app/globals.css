@@ -518,6 +518,49 @@ h2 {
   border-top: 1px dashed var(--line);
 }
 
+.runtimeNotice {
+  display: grid;
+  gap: 14px;
+  margin: 24px 0;
+  padding: 18px;
+  border: 1px solid rgba(176, 109, 44, 0.5);
+  background: rgba(176, 109, 44, 0.12);
+  box-shadow: var(--shadow);
+}
+
+.runtimeNotice strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 1.35rem;
+}
+
+.runtimeNotice span {
+  display: block;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.runtimeNotice code {
+  display: block;
+  overflow-x: auto;
+  padding: 12px;
+  border: 1px dashed var(--line);
+  color: var(--ink);
+  background: rgba(248, 240, 220, 0.76);
+  font-family: "Courier New", monospace;
+  font-size: 0.9rem;
+}
+
+.runtimeNotice a {
+  width: fit-content;
+  border: 1px solid var(--ink);
+  padding: 9px 12px;
+  text-decoration: none;
+  font-family: "Trebuchet MS", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 .statusCard strong {
   display: block;
   margin-bottom: 10px;

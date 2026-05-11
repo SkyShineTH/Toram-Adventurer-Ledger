@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { fetchApi } from "../api-client";
+import { ApiUnavailableNotice, LoaderRequiredNotice } from "../runtime-state";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -52,6 +53,7 @@ async function getRecommendations(playerLevel: number) {
     graph: graph.ok ? graph.data : null,
     quests: quests.ok ? quests.data.items : [],
     leveling: leveling.ok ? leveling.data.items : [],
+    error: graph.ok ? (quests.ok ? (leveling.ok ? null : leveling.message) : quests.message) : graph.message,
   };
 }
 
@@ -59,7 +61,7 @@ export default async function RecommendationsPage({ searchParams }: { searchPara
   const params = (await searchParams) ?? {};
   const levelInput = firstValue(params.level);
   const playerLevel = parseLevel(levelInput);
-  const { graph, quests, leveling } = await getRecommendations(playerLevel);
+  const { graph, quests, leveling, error } = await getRecommendations(playerLevel);
 
   return (
     <main className="shell">
@@ -90,6 +92,9 @@ export default async function RecommendationsPage({ searchParams }: { searchPara
         <button type="submit">Recalculate</button>
       </form>
 
+      {error ? <ApiUnavailableNotice message={error} /> : null}
+      {!error && graph && graph.nodes === 0 ? <LoaderRequiredNotice /> : null}
+
       <section className="recommendationGrid">
         <article className="ledgerBlock statusCard">
           <p className="eyebrow">Graph shape</p>
@@ -108,13 +113,17 @@ export default async function RecommendationsPage({ searchParams }: { searchPara
             <h2>Best side quest leads</h2>
           </div>
           <div className="tableLike">
-            {quests.map((quest) => (
-              <div className="row" key={quest.id}>
-                <span>{quest.title}</span>
-                <span>{quest.objective_count} objectives</span>
-                <strong>{quest.exp_per_objective.toLocaleString()} EXP/objective</strong>
-              </div>
-            ))}
+            {quests.length > 0 ? (
+              quests.map((quest) => (
+                <div className="row" key={quest.id}>
+                  <span>{quest.title}</span>
+                  <span>{quest.objective_count} objectives</span>
+                  <strong>{quest.exp_per_objective.toLocaleString()} EXP/objective</strong>
+                </div>
+              ))
+            ) : (
+              <p className="emptyState">No quest recommendations found for this level.</p>
+            )}
           </div>
         </article>
 
@@ -124,23 +133,27 @@ export default async function RecommendationsPage({ searchParams }: { searchPara
             <h2>Maps near level {playerLevel}</h2>
           </div>
           <div className="routeList">
-            {leveling.map((route) => (
-              <section className="routeCard" key={`${route.map_id}:${route.map_name}`}>
-                <div>
-                  <strong>{route.map_name}</strong>
-                  <span>
-                    {route.monster_count} monsters / avg {route.average_exp.toLocaleString()} EXP
-                  </span>
-                </div>
-                <ul>
-                  {route.monsters.map((monster) => (
-                    <li key={monster.id}>
-                      {monster.name} · Lv {monster.level ?? "?"} · {monster.exp?.toLocaleString() ?? "?"} EXP
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
+            {leveling.length > 0 ? (
+              leveling.map((route) => (
+                <section className="routeCard" key={`${route.map_id}:${route.map_name}`}>
+                  <div>
+                    <strong>{route.map_name}</strong>
+                    <span>
+                      {route.monster_count} monsters / avg {route.average_exp.toLocaleString()} EXP
+                    </span>
+                  </div>
+                  <ul>
+                    {route.monsters.map((monster) => (
+                      <li key={monster.id}>
+                        {monster.name} / Lv {monster.level ?? "?"} / {monster.exp?.toLocaleString() ?? "?"} EXP
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))
+            ) : (
+              <p className="emptyState">No leveling route candidates found for this level.</p>
+            )}
           </div>
         </article>
       </section>

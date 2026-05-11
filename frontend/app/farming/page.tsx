@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { fetchApi } from "../api-client";
+import { ApiUnavailableNotice, LoaderRequiredNotice } from "../runtime-state";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -26,6 +27,7 @@ type FarmingPlan = {
   player_level: number | null;
   items: FarmingCandidate[];
   limitations: string[];
+  error: string | null;
 };
 
 const GOALS = [
@@ -50,13 +52,16 @@ function parseGoal(value: string): string {
 }
 
 async function getFarmingPlan(goal: string, playerLevel: number): Promise<FarmingPlan> {
-  const result = await fetchApi<FarmingPlan>(`/farming/plan?goal=${goal}&player_level=${playerLevel}&limit=10`);
+  const result = await fetchApi<Omit<FarmingPlan, "error">>(
+    `/farming/plan?goal=${goal}&player_level=${playerLevel}&limit=10`,
+  );
   return result.ok
-    ? result.data
+    ? { ...result.data, error: null }
     : {
         goal,
         player_level: playerLevel,
         items: [],
+        error: result.message,
         limitations: ["Farming plan is unavailable. Check whether the backend has loaded processed data."],
       };
 }
@@ -103,6 +108,8 @@ export default async function FarmingPage({ searchParams }: { searchParams?: Sea
         </label>
         <button type="submit">Plan farming</button>
       </form>
+
+      {plan.error ? <ApiUnavailableNotice message={plan.error} /> : null}
 
       <section className="farmingGrid">
         <article className="ledgerBlock statusCard">
@@ -151,7 +158,7 @@ export default async function FarmingPage({ searchParams }: { searchParams?: Sea
               ))}
             </div>
           ) : (
-            <p className="emptyState">No farming candidates found for this goal.</p>
+            <>{plan.error ? null : <LoaderRequiredNotice />}</>
           )}
         </article>
 

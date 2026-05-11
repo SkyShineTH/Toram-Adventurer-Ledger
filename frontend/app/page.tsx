@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { PUBLIC_API_BASE_URL, fetchApi } from "./api-client";
+import { ApiUnavailableNotice, LoaderRequiredNotice } from "./runtime-state";
 
 type SmartSummary = {
   counts: Record<string, number>;
@@ -14,15 +15,16 @@ type SmartSummary = {
   monster_level_bands: Record<string, number>;
 };
 
-async function getSummary(): Promise<SmartSummary | null> {
+async function getSummary() {
   const result = await fetchApi<SmartSummary>("/dashboard/smart-play");
-  return result.ok ? result.data : null;
+  return result.ok ? { data: result.data, error: null } : { data: null, error: result.message };
 }
 
 export default async function Home() {
-  const summary = await getSummary();
+  const { data: summary, error } = await getSummary();
   const counts = summary?.counts ?? {};
   const bands = Object.entries(summary?.monster_level_bands ?? {}).slice(-6);
+  const hasLoadedData = Object.values(counts).some((count) => count > 0);
 
   return (
     <main className="shell">
@@ -60,6 +62,9 @@ export default async function Home() {
           </div>
         ))}
       </section>
+
+      {error ? <ApiUnavailableNotice message={error} /> : null}
+      {summary && !hasLoadedData ? <LoaderRequiredNotice /> : null}
 
       <section className="dashboardGrid">
         <article className="ledgerBlock wide">
