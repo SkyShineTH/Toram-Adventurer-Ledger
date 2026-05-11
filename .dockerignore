@@ -1,0 +1,14 @@
+.env
+.git
+.github
+History
+frontend/.next
+frontend/node_modules
+frontend/out
+__pycache__
+*.pyc
+reports/validation/*.json
+reports/validation/*.jsonl
+reports/validation/*.md
+data/processed/*.json
+data/processed/*.jsonl

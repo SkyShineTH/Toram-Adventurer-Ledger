@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { API_BASE_URL, fetchApi } from "./api-client";
+import { PUBLIC_API_BASE_URL, fetchApi } from "./api-client";
 
 type SmartSummary = {
   counts: Record<string, number>;
@@ -39,7 +39,7 @@ export default async function Home() {
             <Link href="/recommendations" className="ghostLink">Recommendations</Link>
             <Link href="/search" className="ghostLink">Search</Link>
             <Link href="/quality" className="ghostLink">Data Quality</Link>
-            <a href={`${API_BASE_URL}/health`} className="ghostLink">API Health</a>
+            <a href={`${PUBLIC_API_BASE_URL}/health`} className="ghostLink">API Health</a>
           </div>
         </div>
         <aside className="statusPanel">
