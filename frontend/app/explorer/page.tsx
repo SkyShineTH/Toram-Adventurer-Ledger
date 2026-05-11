@@ -44,6 +44,31 @@ function endpoint(path: string, params: Record<string, string>): string {
   return `${path}?${query.toString()}`;
 }
 
+function parseOffset(value: string): number {
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed)) return 0;
+  return Math.max(0, parsed);
+}
+
+function explorerHref(
+  currentParams: Record<string, string | string[] | undefined>,
+  offsetKey: string,
+  offset: number,
+): string {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(currentParams)) {
+    const stringValue = firstValue(value).trim();
+    if (stringValue) query.set(key, stringValue);
+  }
+  if (offset > 0) {
+    query.set(offsetKey, String(offset));
+  } else {
+    query.delete(offsetKey);
+  }
+  const serialized = query.toString();
+  return serialized ? `/explorer?${serialized}` : "/explorer";
+}
+
 async function fetchList<T>(path: string): Promise<ApiList<T>> {
   const result = await fetchApi<ApiList<T>>(path);
   return result.ok ? result.data : { total: 0, limit: LIMIT, offset: 0, items: [] };
@@ -60,18 +85,24 @@ export default async function Explorer({ searchParams }: { searchParams?: Search
   const questQ = firstValue(params.quest_q);
   const questNpc = firstValue(params.quest_npc);
   const questMinExp = firstValue(params.quest_min_exp);
+  const itemOffset = parseOffset(firstValue(params.item_offset));
+  const monsterOffset = parseOffset(firstValue(params.monster_offset));
+  const questOffset = parseOffset(firstValue(params.quest_offset));
 
   const [items, monsters, quests] = await Promise.all([
-    fetchList<Item>(endpoint("/items", { q: itemQ, type_label: itemType })),
+    fetchList<Item>(endpoint("/items", { q: itemQ, type_label: itemType, offset: String(itemOffset) })),
     fetchList<Monster>(
       endpoint("/monsters", {
         q: monsterQ,
         element_label: monsterElement,
         min_level: monsterMinLevel,
         max_level: monsterMaxLevel,
+        offset: String(monsterOffset),
       }),
     ),
-    fetchList<Quest>(endpoint("/quests", { q: questQ, npc_name: questNpc, min_exp: questMinExp })),
+    fetchList<Quest>(
+      endpoint("/quests", { q: questQ, npc_name: questNpc, min_exp: questMinExp, offset: String(questOffset) }),
+    ),
   ]);
 
   return (
@@ -106,6 +137,11 @@ export default async function Explorer({ searchParams }: { searchParams?: Search
             item.sell ? `${item.sell.toLocaleString()} spina` : "no sell",
             entityHref("item", item.id),
           ])}
+          pagination={{
+            list: items,
+            previousHref: explorerHref(params, "item_offset", Math.max(0, items.offset - items.limit)),
+            nextHref: explorerHref(params, "item_offset", items.offset + items.limit),
+          }}
         />
         <ExplorerColumn
           title="Monsters"
@@ -126,6 +162,11 @@ export default async function Explorer({ searchParams }: { searchParams?: Search
             monster.map_name ?? "unknown map",
             entityHref("monster", monster.id),
           ])}
+          pagination={{
+            list: monsters,
+            previousHref: explorerHref(params, "monster_offset", Math.max(0, monsters.offset - monsters.limit)),
+            nextHref: explorerHref(params, "monster_offset", monsters.offset + monsters.limit),
+          }}
         />
         <ExplorerColumn
           title="Quests"
@@ -145,6 +186,11 @@ export default async function Explorer({ searchParams }: { searchParams?: Search
             `${quest.exp_reward?.toLocaleString() ?? "?"} EXP`,
             entityHref("quest", quest.id),
           ])}
+          pagination={{
+            list: quests,
+            previousHref: explorerHref(params, "quest_offset", Math.max(0, quests.offset - quests.limit)),
+            nextHref: explorerHref(params, "quest_offset", quests.offset + quests.limit),
+          }}
         />
       </section>
     </main>
@@ -177,16 +223,29 @@ function ExplorerColumn({
   total,
   form,
   rows,
+  pagination,
 }: {
   title: string;
   total: number;
   form: ReactNode;
   rows: Array<[string, string, string, string | null]>;
+  pagination: {
+    list: ApiList<unknown>;
+    previousHref: string;
+    nextHref: string;
+  };
 }) {
+  const currentStart = total === 0 ? 0 : pagination.list.offset + 1;
+  const currentEnd = Math.min(total, pagination.list.offset + pagination.list.items.length);
+  const hasPrevious = pagination.list.offset > 0;
+  const hasNext = pagination.list.offset + pagination.list.limit < total;
+
   return (
     <article className="ledgerBlock">
       <div className="sectionHead">
-        <p className="eyebrow">{total.toLocaleString()} matched records</p>
+        <p className="eyebrow">
+          {total.toLocaleString()} matched records / showing {currentStart.toLocaleString()}-{currentEnd.toLocaleString()}
+        </p>
         <h2>{title}</h2>
       </div>
       {form}
@@ -203,6 +262,14 @@ function ExplorerColumn({
           <p className="emptyState">No records matched this filter set.</p>
         )}
       </div>
+      <nav className="pager" aria-label={`${title} pagination`}>
+        {hasPrevious ? <Link href={pagination.previousHref}>Previous</Link> : <span>Previous</span>}
+        <small>
+          Page {Math.floor(pagination.list.offset / pagination.list.limit) + 1} of{" "}
+          {Math.max(1, Math.ceil(total / pagination.list.limit))}
+        </small>
+        {hasNext ? <Link href={pagination.nextHref}>Next</Link> : <span>Next</span>}
+      </nav>
     </article>
   );
 }

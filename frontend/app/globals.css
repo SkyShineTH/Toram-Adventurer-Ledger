@@ -341,6 +341,38 @@ h2 {
   background: var(--ink);
 }
 
+.pager {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line);
+}
+
+.pager a,
+.pager span {
+  min-width: 88px;
+  padding: 9px 12px;
+  border: 1px solid var(--ink);
+  text-align: center;
+  text-decoration: none;
+  font-family: "Trebuchet MS", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.pager span {
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.pager small {
+  color: var(--muted);
+  text-align: center;
+}
+
 .levelForm {
   display: flex;
   flex-wrap: wrap;
