@@ -42,3 +42,6 @@ py scripts/03_load_postgres.py --allow-findings
 ```
 
 Use `--skip-etl` only when `data/processed/` and `reports/validation/` are already current.
+
+The loader also builds `search_documents`, a pgvector-ready document mart with nullable embeddings. Embeddings are
+intentionally left empty until the embedding model and refresh workflow are selected.

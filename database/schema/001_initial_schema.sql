@@ -86,9 +86,21 @@ CREATE TABLE data_quality_issues (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE search_documents (
+    id TEXT PRIMARY KEY,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+    embedding vector(1536),
+    source_snapshot_id BIGINT REFERENCES source_snapshots(id)
+);
+
 CREATE INDEX idx_items_name ON items(name);
 CREATE INDEX idx_monsters_level ON monsters(level);
 CREATE INDEX idx_monsters_map_id ON monsters(map_id);
 CREATE INDEX idx_quests_level_required ON quests(level_required);
 CREATE INDEX idx_quest_objectives_target_item_id ON quest_objectives(target_item_id);
-
+CREATE INDEX idx_search_documents_entity ON search_documents(entity_type, entity_id);
+CREATE INDEX idx_search_documents_content ON search_documents USING GIN (to_tsvector('english', content));

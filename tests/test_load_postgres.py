@@ -32,6 +32,21 @@ class PostgresLoaderTests(unittest.TestCase):
         self.assertIsNone(sanitized[2]["target_item_id"])
         self.assertEqual(rows[1]["target_item_id"], 99)
 
+    def test_build_search_documents_includes_quest_objective_context(self) -> None:
+        loader = load_loader()
+
+        documents = loader.build_search_documents(
+            items=[{"id": 10, "name": "Soft Fur", "type_label": "[Material]", "sell": 2}],
+            maps=[],
+            monsters=[],
+            quests=[{"id": 20, "title": "Warm Coat", "type": "Side Quest", "npc_name": "Yunis", "exp_reward": 1000}],
+            objectives=[{"quest_id": 20, "text": "Collect 10 xSoft Fur", "target_item_id": 10}],
+        )
+
+        quest_document = next(document for document in documents if document["id"] == "quest:20")
+        self.assertIn("Collect 10 xSoft Fur", quest_document["content"])
+        self.assertEqual(quest_document["metadata"]["objective_count"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -60,6 +60,110 @@ def attach_snapshot_id(rows: list[dict[str, Any]], snapshot_id: int) -> list[dic
     return [{**row, "source_snapshot_id": snapshot_id} for row in rows]
 
 
+def compact_metadata(row: dict[str, Any], keys: list[str]) -> dict[str, Any]:
+    return {key: row.get(key) for key in keys if row.get(key) is not None}
+
+
+def build_search_documents(
+    items: list[dict[str, Any]],
+    maps: list[dict[str, Any]],
+    monsters: list[dict[str, Any]],
+    quests: list[dict[str, Any]],
+    objectives: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    documents: list[dict[str, Any]] = []
+
+    for item in items:
+        documents.append(
+            {
+                "id": f"item:{item.get('id')}",
+                "entity_type": "item",
+                "entity_id": str(item.get("id")),
+                "title": item.get("name") or f"Item {item.get('id')}",
+                "content": " ".join(
+                    part
+                    for part in [
+                        item.get("name"),
+                        item.get("type_label"),
+                        item.get("note"),
+                        f"sell {item.get('sell')}" if item.get("sell") is not None else None,
+                    ]
+                    if part
+                ),
+                "metadata": compact_metadata(item, ["type_label", "sell", "process", "process_amount"]),
+            }
+        )
+
+    for game_map in maps:
+        documents.append(
+            {
+                "id": f"map:{game_map.get('id')}",
+                "entity_type": "map",
+                "entity_id": str(game_map.get("id")),
+                "title": game_map.get("name") or f"Map {game_map.get('id')}",
+                "content": game_map.get("name") or "",
+                "metadata": {},
+            }
+        )
+
+    for monster in monsters:
+        documents.append(
+            {
+                "id": f"monster:{monster.get('id')}",
+                "entity_type": "monster",
+                "entity_id": str(monster.get("id")),
+                "title": monster.get("name") or f"Monster {monster.get('id')}",
+                "content": " ".join(
+                    part
+                    for part in [
+                        monster.get("name"),
+                        monster.get("map_name"),
+                        monster.get("type_label"),
+                        monster.get("element_label"),
+                        f"level {monster.get('level')}" if monster.get("level") is not None else None,
+                        f"exp {monster.get('exp')}" if monster.get("exp") is not None else None,
+                    ]
+                    if part
+                ),
+                "metadata": compact_metadata(monster, ["level", "map_id", "map_name", "element_label", "exp", "type_label"]),
+            }
+        )
+
+    objectives_by_quest: dict[int, list[dict[str, Any]]] = {}
+    for objective in objectives:
+        quest_id = objective.get("quest_id")
+        if isinstance(quest_id, int):
+            objectives_by_quest.setdefault(quest_id, []).append(objective)
+
+    for quest in quests:
+        quest_objectives = objectives_by_quest.get(quest.get("id"), [])
+        objective_text = " ".join(str(objective.get("text") or "") for objective in quest_objectives)
+        documents.append(
+            {
+                "id": f"quest:{quest.get('id')}",
+                "entity_type": "quest",
+                "entity_id": str(quest.get("id")),
+                "title": quest.get("title") or f"Quest {quest.get('id')}",
+                "content": " ".join(
+                    part
+                    for part in [
+                        quest.get("title"),
+                        quest.get("type"),
+                        quest.get("npc_name"),
+                        f"level {quest.get('level_required')}" if quest.get("level_required") is not None else None,
+                        f"exp {quest.get('exp_reward')}" if quest.get("exp_reward") is not None else None,
+                        objective_text,
+                    ]
+                    if part
+                ),
+                "metadata": compact_metadata(quest, ["type", "level_required", "exp_reward", "npc_name"])
+                | {"objective_count": len(quest_objectives)},
+            }
+        )
+
+    return documents
+
+
 def execute_values(cursor: Any, table: str, columns: list[str], rows: list[dict[str, Any]]) -> None:
     if not rows:
         return
@@ -102,6 +206,34 @@ def load_quality_issues(cursor: Any, rows: list[dict[str, Any]]) -> None:
     )
 
 
+def load_search_documents(cursor: Any, rows: list[dict[str, Any]], snapshot_id: int) -> None:
+    if not rows:
+        return
+    from psycopg2.extras import Json, execute_values as psycopg_execute_values
+
+    values = [
+        (
+            row.get("id"),
+            row.get("entity_type"),
+            row.get("entity_id"),
+            row.get("title"),
+            row.get("content"),
+            Json(row.get("metadata") or {}),
+            snapshot_id,
+        )
+        for row in rows
+    ]
+    psycopg_execute_values(
+        cursor,
+        """
+        INSERT INTO search_documents (
+            id, entity_type, entity_id, title, content, metadata, source_snapshot_id
+        ) VALUES %s
+        """,
+        values,
+    )
+
+
 def load_database(database_url: str, processed_dir: Path, validation_dir: Path, allow_findings: bool) -> dict[str, int]:
     import psycopg2
 
@@ -118,6 +250,7 @@ def load_database(database_url: str, processed_dir: Path, validation_dir: Path, 
         read_jsonl(processed_dir / "quest_objectives.jsonl"),
         {row["id"] for row in items if isinstance(row.get("id"), int)},
     )
+    search_documents = build_search_documents(items, maps, monsters, quests, objectives)
     quality_issues = read_jsonl(validation_dir / "dead_letter.jsonl")
 
     trace = items[0] if items else {}
@@ -127,6 +260,7 @@ def load_database(database_url: str, processed_dir: Path, validation_dir: Path, 
                 """
                 TRUNCATE
                     data_quality_issues,
+                    search_documents,
                     quest_objectives,
                     quests,
                     npcs,
@@ -226,6 +360,7 @@ def load_database(database_url: str, processed_dir: Path, validation_dir: Path, 
                 attach_snapshot_id(objectives, snapshot_id),
             )
             load_quality_issues(cursor, quality_issues)
+            load_search_documents(cursor, search_documents, snapshot_id)
 
     return {
         "items": len(items),
@@ -234,6 +369,7 @@ def load_database(database_url: str, processed_dir: Path, validation_dir: Path, 
         "npcs": len(npcs),
         "quests": len(quests),
         "quest_objectives": len(objectives),
+        "search_documents": len(search_documents),
         "data_quality_issues": len(quality_issues),
     }
 
