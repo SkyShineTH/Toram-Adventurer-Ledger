@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { fetchApi } from "../api-client";
+import { entityHref } from "../entity-links";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -78,7 +79,13 @@ export default async function SearchPage({ searchParams }: { searchParams?: Sear
             results.items.map((item) => (
               <article className="searchResult" key={item.id}>
                 <div>
-                  <strong>{item.title}</strong>
+                  <strong>
+                    {entityHref(item.entity_type, item.entity_id) ? (
+                      <Link href={entityHref(item.entity_type, item.entity_id) ?? "#"}>{item.title}</Link>
+                    ) : (
+                      item.title
+                    )}
+                  </strong>
                   <span>{item.entity_type}</span>
                 </div>
                 <p>{item.content}</p>

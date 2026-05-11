@@ -67,6 +67,13 @@ def current_graph():
     return build_ledger_graph(repository)
 
 
+def find_row(rows: list[dict[str, Any]], entity_id: int, *, id_key: str = "id") -> dict[str, Any] | None:
+    for row in rows:
+        if row.get(id_key) == entity_id:
+            return row
+    return None
+
+
 @app.get("/health")
 def health() -> dict[str, Any]:
     return {
@@ -184,15 +191,25 @@ def items(
 
 @app.get("/items/{item_id}")
 def item_detail(item_id: int) -> dict[str, Any]:
-    for item in repository.dataset("items"):
-        if item.get("id") == item_id:
-            return item
+    item = find_row(repository.dataset("items"), item_id)
+    if item:
+        related = quests_for_item(item_id)
+        return {**item, "related_quests": related["quests"], "related_objectives": related["objectives"]}
     raise HTTPException(status_code=404, detail="Item not found")
 
 
 @app.get("/maps")
 def maps(q: str | None = None, limit: int = 50, offset: int = 0) -> dict[str, Any]:
     return filter_rows(repository.dataset("maps"), query=q, limit=limit, offset=offset)
+
+
+@app.get("/maps/{map_id}")
+def map_detail(map_id: int) -> dict[str, Any]:
+    game_map = find_row(repository.dataset("maps"), map_id)
+    if not game_map:
+        raise HTTPException(status_code=404, detail="Map not found")
+    monsters_on_map = [row for row in repository.dataset("monsters") if row.get("map_id") == map_id]
+    return {**game_map, "monsters": monsters_on_map}
 
 
 @app.get("/monsters")
@@ -220,6 +237,14 @@ def monsters(
     return filter_rows(rows, query=q, limit=limit, offset=offset)
 
 
+@app.get("/monsters/{monster_id}")
+def monster_detail(monster_id: int) -> dict[str, Any]:
+    monster = find_row(repository.dataset("monsters"), monster_id)
+    if monster:
+        return monster
+    raise HTTPException(status_code=404, detail="Monster not found")
+
+
 @app.get("/quests")
 def quests(
     q: str | None = None,
@@ -243,6 +268,15 @@ def quests(
     if min_exp is not None:
         rows = [row for row in rows if isinstance(row.get("exp_reward"), int) and row["exp_reward"] >= min_exp]
     return filter_rows(rows, query=q, limit=limit, offset=offset)
+
+
+@app.get("/quests/{quest_id}")
+def quest_detail(quest_id: int) -> dict[str, Any]:
+    quest = find_row(repository.dataset("quests"), quest_id)
+    if not quest:
+        raise HTTPException(status_code=404, detail="Quest not found")
+    objectives = [row for row in repository.dataset("quest_objectives") if row.get("quest_id") == quest_id]
+    return {**quest, "objectives": objectives}
 
 
 @app.get("/relationships/item/{item_id}/quests")

@@ -59,6 +59,10 @@ a {
   max-width: 820px;
 }
 
+.detailHero {
+  max-width: 900px;
+}
+
 .eyebrow {
   margin: 0 0 12px;
   color: var(--amber);
@@ -168,6 +172,11 @@ h2 {
   margin: clamp(32px, 6vw, 72px) 0;
 }
 
+.detailMetrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
 .metric {
   padding: 18px;
 }
@@ -212,6 +221,13 @@ h2 {
   grid-template-columns: 0.7fr 1.3fr;
   gap: 18px;
   margin-top: 18px;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: 0.78fr 1.22fr;
+  gap: 18px;
+  margin-top: clamp(28px, 5vw, 56px);
 }
 
 .ledgerBlock {
@@ -554,6 +570,11 @@ h2 {
   padding-left: 18px;
 }
 
+.detailNote {
+  margin-top: 20px;
+  font-size: 1rem;
+}
+
 .searchResults {
   margin-top: 18px;
 }
@@ -599,7 +620,9 @@ h2 {
   .tripleGrid,
   .qualityGrid,
   .recommendationGrid,
-  .questHelperGrid {
+  .questHelperGrid,
+  .detailGrid,
+  .detailMetrics {
     grid-template-columns: 1fr;
   }
 

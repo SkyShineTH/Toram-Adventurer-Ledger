@@ -35,9 +35,13 @@ Key endpoints:
 - `GET /side-quests/recommendations?player_level=&goal=balanced|exp|item_collection&limit=`
 - `GET /search?q=&entity_type=&limit=`
 - `GET /items?q=&type_label=&min_sell=&max_sell=`
+- `GET /items/{item_id}`
 - `GET /maps`
+- `GET /maps/{map_id}`
 - `GET /monsters?q=&type_label=&element_label=&min_level=&max_level=&map_id=`
+- `GET /monsters/{monster_id}`
 - `GET /quests?q=&quest_type=&npc_name=&min_level=&max_level=&min_exp=`
+- `GET /quests/{quest_id}`
 - `GET /relationships/item/{item_id}/quests`
 
 `/side-quests/recommendations` returns ranked quest candidates with `required_items`,

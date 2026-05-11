@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { type ApiList, fetchApi } from "../api-client";
+import { entityHref } from "../entity-links";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -103,6 +104,7 @@ export default async function Explorer({ searchParams }: { searchParams?: Search
             item.name,
             item.type_label ?? "unknown type",
             item.sell ? `${item.sell.toLocaleString()} spina` : "no sell",
+            entityHref("item", item.id),
           ])}
         />
         <ExplorerColumn
@@ -122,6 +124,7 @@ export default async function Explorer({ searchParams }: { searchParams?: Search
             monster.name,
             `Lv ${monster.level ?? "?"} ${monster.element_label ?? ""}`.trim(),
             monster.map_name ?? "unknown map",
+            entityHref("monster", monster.id),
           ])}
         />
         <ExplorerColumn
@@ -140,6 +143,7 @@ export default async function Explorer({ searchParams }: { searchParams?: Search
             quest.title,
             `${quest.type ?? "Quest"} Lv ${quest.level_required ?? "?"}`,
             `${quest.exp_reward?.toLocaleString() ?? "?"} EXP`,
+            entityHref("quest", quest.id),
           ])}
         />
       </section>
@@ -177,7 +181,7 @@ function ExplorerColumn({
   title: string;
   total: number;
   form: ReactNode;
-  rows: string[][];
+  rows: Array<[string, string, string, string | null]>;
 }) {
   return (
     <article className="ledgerBlock">
@@ -190,7 +194,7 @@ function ExplorerColumn({
         {rows.length > 0 ? (
           rows.map((row) => (
             <div className="row" key={row.join(":")}>
-              <span>{row[0]}</span>
+              <span>{row[3] ? <Link href={row[3]}>{row[0]}</Link> : row[0]}</span>
               <span>{row[1]}</span>
               <strong>{row[2]}</strong>
             </div>
