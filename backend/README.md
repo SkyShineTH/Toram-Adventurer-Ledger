@@ -33,6 +33,7 @@ Key endpoints:
 - `GET /recommendations/quests?player_level=&limit=`
 - `GET /recommendations/leveling?player_level=&window=&limit=`
 - `GET /side-quests/recommendations?player_level=&goal=balanced|exp|item_collection&limit=`
+- `GET /farming/plan?goal=balanced|npc_sell|quest_material&player_level=&limit=`
 - `GET /search?q=&entity_type=&limit=`
 - `GET /items?q=&type_label=&min_sell=&max_sell=`
 - `GET /items/{item_id}`
@@ -48,3 +49,7 @@ Key endpoints:
 `npc_name`, `exp_per_objective`, `score`, and a short `reason`. The route only ranks
 quests available at or below `player_level`; it does not invent requirements that are
 not present in validated quest objective data.
+
+`/farming/plan` returns target items for NPC sell value and quest material planning.
+It explicitly reports that drop locations are not ranked until validated
+Monster -> Drop -> Item relationships exist in the warehouse.

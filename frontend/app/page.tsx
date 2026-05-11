@@ -37,6 +37,7 @@ export default async function Home() {
           <div className="actions">
             <Link href="/explorer" className="primaryLink">Open Explorer</Link>
             <Link href="/profile" className="ghostLink">Profile Planner</Link>
+            <Link href="/farming" className="ghostLink">Farming</Link>
             <Link href="/side-quests" className="ghostLink">Side Quests</Link>
             <Link href="/recommendations" className="ghostLink">Recommendations</Link>
             <Link href="/search" className="ghostLink">Search</Link>

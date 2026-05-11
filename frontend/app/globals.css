@@ -230,6 +230,13 @@ h2 {
   margin-top: 18px;
 }
 
+.farmingGrid {
+  display: grid;
+  grid-template-columns: 0.7fr 1.3fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+
 .detailGrid {
   display: grid;
   grid-template-columns: 0.78fr 1.22fr;
@@ -725,6 +732,7 @@ h2 {
   .recommendationGrid,
   .questHelperGrid,
   .profileGrid,
+  .farmingGrid,
   .detailGrid,
   .detailMetrics {
     grid-template-columns: 1fr;

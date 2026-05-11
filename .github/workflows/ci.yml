@@ -34,7 +34,7 @@ jobs:
 
       - name: Compile Python scripts
         run: |
-          python -m py_compile backend/config.py backend/main.py backend/repositories.py backend/graph.py backend/side_quests.py scripts/01_extract_and_clean.py scripts/02_validate_raw_data.py scripts/03_load_postgres.py
+          python -m py_compile backend/config.py backend/main.py backend/repositories.py backend/graph.py backend/side_quests.py backend/farming.py scripts/01_extract_and_clean.py scripts/02_validate_raw_data.py scripts/03_load_postgres.py
 
       - name: Validate Docker Compose config
         run: |
@@ -113,6 +113,7 @@ jobs:
           assert client.get("/graph/summary").json()["nodes"] > 0
           assert client.get("/search?q=Sample&limit=1").json()["items"]
           assert client.get("/side-quests/recommendations?player_level=50&limit=1").json()["items"]
+          assert client.get("/farming/plan?goal=quest_material&player_level=50&limit=1").json()["items"]
           PY
 
   frontend-build:

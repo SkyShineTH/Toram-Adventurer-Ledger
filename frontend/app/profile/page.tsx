@@ -148,6 +148,11 @@ export default async function ProfilePage({ searchParams }: { searchParams?: Sea
               href={href("/recommendations", { level })}
             />
             <ProfileAction
+              title="Farming Planner Lite"
+              body="Rank NPC sell and quest-material targets without pretending drop routes exist yet."
+              href={href("/farming", { level, goal: goal === "spina" ? "npc_sell" : "balanced" })}
+            />
+            <ProfileAction
               title="Gear And Material Search"
               body="Search the retrieval mart for weapon, stat, and budget-related terms."
               href={href("/search", { q: searchQuery })}

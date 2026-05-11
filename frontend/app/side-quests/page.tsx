@@ -58,6 +58,7 @@ export default async function SideQuestsPage({ searchParams }: { searchParams?: 
         <Link href="/">Dashboard</Link>
         <Link href="/explorer">Explorer</Link>
         <Link href="/profile">Profile</Link>
+        <Link href="/farming">Farming</Link>
         <Link href="/recommendations">Recommendations</Link>
         <Link href="/quality">Data Quality</Link>
         <span>Side Quests</span>

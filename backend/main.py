@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.config import load_project_env
+from backend.farming import farming_plan
 from backend.graph import (
     build_ledger_graph,
     graph_summary,
@@ -158,6 +159,11 @@ def recommended_side_quests(player_level: int, goal: str = "balanced", limit: in
         "goal": goal,
         "items": side_quest_recommendations(repository, player_level=player_level, goal=goal, limit=limit),
     }
+
+
+@app.get("/farming/plan")
+def recommended_farming(goal: str = "balanced", player_level: int | None = None, limit: int = 10) -> dict[str, Any]:
+    return farming_plan(repository, goal=goal, player_level=player_level, limit=limit)
 
 
 @app.get("/search")
