@@ -122,7 +122,7 @@ export default async function Explorer({ searchParams }: { searchParams?: Search
 
   return (
     <main className="shell">
-      <nav className="topNav">
+      <nav className="topNav" aria-label="Page navigation">
         <Link href="/">Dashboard</Link>
         <span>Explorer</span>
       </nav>
@@ -266,10 +266,10 @@ function ExplorerColumn({
         <h2>{title}</h2>
       </div>
       {form}
-      <div className="tableLike tight">
+      <div className="tableLike tight" role="list">
         {rows.length > 0 ? (
           rows.map((row) => (
-            <div className="row" key={row.join(":")}>
+            <div className="row" role="listitem" key={row.join(":")}>
               <span>{row[3] ? <Link href={row[3]}>{row[0]}</Link> : row[0]}</span>
               <span>{row[1]}</span>
               <strong>{row[2]}</strong>

@@ -65,7 +65,7 @@ export default async function RecommendationsPage({ searchParams }: { searchPara
 
   return (
     <main className="shell">
-      <nav className="topNav">
+      <nav className="topNav" aria-label="Page navigation">
         <Link href="/">Dashboard</Link>
         <Link href="/explorer">Explorer</Link>
         <Link href="/profile">Profile</Link>
@@ -76,20 +76,20 @@ export default async function RecommendationsPage({ searchParams }: { searchPara
       </nav>
 
       <section className="explorerHero">
-        <p className="eyebrow">Graph recommendations</p>
-        <h1>Turn the ledger into the next practical route.</h1>
+        <p className="eyebrow">Route board</p>
+        <h1>Compare practical leads near your current level.</h1>
         <p className="lede">
-          NetworkX builds an in-memory graph from validated entities. This first pass ranks side quests and
-          leveling maps from the relationships currently available.
+          These suggestions come from the validated graph currently loaded in PostgreSQL. Treat them as good
+          session candidates, then inspect details before committing time in game.
         </p>
       </section>
 
-      <form className="levelForm">
+      <form className="levelForm routeControl">
         <label>
           <span>Player level</span>
           <input name="level" inputMode="numeric" defaultValue={String(playerLevel)} />
         </label>
-        <button type="submit">Recalculate</button>
+        <button type="submit">Refresh routes</button>
       </form>
 
       {error ? <ApiUnavailableNotice message={error} /> : null}
@@ -97,9 +97,9 @@ export default async function RecommendationsPage({ searchParams }: { searchPara
 
       <section className="recommendationGrid">
         <article className="ledgerBlock statusCard">
-          <p className="eyebrow">Graph shape</p>
+          <p className="eyebrow">Data confidence</p>
           <strong>{graph?.nodes.toLocaleString() ?? "-"}</strong>
-          <span>{graph?.edges.toLocaleString() ?? "-"} relationships</span>
+          <span>{graph?.edges.toLocaleString() ?? "-"} known relationships</span>
           <small>
             {Object.entries(graph?.nodes_by_kind ?? {})
               .map(([kind, count]) => `${kind}: ${count}`)
@@ -109,35 +109,43 @@ export default async function RecommendationsPage({ searchParams }: { searchPara
 
         <article className="ledgerBlock wide">
           <div className="sectionHead">
-            <p className="eyebrow">Quest efficiency</p>
-            <h2>Best side quest leads</h2>
+            <p className="eyebrow">Quest routes</p>
+            <h2>Good EXP leads for Lv {playerLevel}</h2>
           </div>
-          <div className="tableLike">
+          <div className="routeList">
             {quests.length > 0 ? (
               quests.map((quest) => (
-                <div className="row" key={quest.id}>
-                  <span>{quest.title}</span>
-                  <span>{quest.objective_count} objectives</span>
-                  <strong>{quest.exp_per_objective.toLocaleString()} EXP/objective</strong>
-                </div>
+                <Link className="routeCard routeCardLink" href={`/quests/${quest.id}`} key={quest.id}>
+                  <div>
+                    <strong>{quest.title}</strong>
+                    <span>{quest.npc_name ?? "NPC unknown"} / {quest.objective_count} objective(s)</span>
+                  </div>
+                  <div className="routeMeta">
+                    <span>Lv {quest.level_required ?? "?"}</span>
+                    <span>{quest.exp_reward?.toLocaleString() ?? "?"} EXP</span>
+                    <b>{quest.exp_per_objective.toLocaleString()} EXP/objective</b>
+                  </div>
+                </Link>
               ))
             ) : (
-              <p className="emptyState">No quest recommendations found for this level.</p>
+              <p className="emptyState">No quest leads matched this level. Try widening the level assumption.</p>
             )}
           </div>
         </article>
 
         <article className="ledgerBlock wide">
           <div className="sectionHead">
-            <p className="eyebrow">Leveling route candidates</p>
-            <h2>Maps near level {playerLevel}</h2>
+            <p className="eyebrow">Map routes</p>
+            <h2>Monster bands near Lv {playerLevel}</h2>
           </div>
           <div className="routeList">
             {leveling.length > 0 ? (
               leveling.map((route) => (
                 <section className="routeCard" key={`${route.map_id}:${route.map_name}`}>
                   <div>
-                    <strong>{route.map_name}</strong>
+                    <strong>
+                      {route.map_id ? <Link href={`/maps/${route.map_id}`}>{route.map_name}</Link> : route.map_name}
+                    </strong>
                     <span>
                       {route.monster_count} monsters / avg {route.average_exp.toLocaleString()} EXP
                     </span>
@@ -152,7 +160,7 @@ export default async function RecommendationsPage({ searchParams }: { searchPara
                 </section>
               ))
             ) : (
-              <p className="emptyState">No leveling route candidates found for this level.</p>
+              <p className="emptyState">No map routes matched this level. Try another level or inspect Explorer.</p>
             )}
           </div>
         </article>

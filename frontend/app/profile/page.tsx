@@ -62,7 +62,7 @@ export default async function ProfilePage({ searchParams }: { searchParams?: Sea
 
   return (
     <main className="shell">
-      <nav className="topNav">
+      <nav className="topNav" aria-label="Page navigation">
         <Link href="/">Dashboard</Link>
         <Link href="/explorer">Explorer</Link>
         <Link href="/side-quests">Side Quests</Link>

@@ -25,16 +25,17 @@ export default async function Home() {
   const counts = summary?.counts ?? {};
   const bands = Object.entries(summary?.monster_level_bands ?? {}).slice(-6);
   const hasLoadedData = Object.values(counts).some((count) => count > 0);
+  const qualityLabel = summary ? `${summary.validation.error_count} visible finding(s)` : "API offline";
 
   return (
     <main className="shell">
       <section className="hero">
-        <div>
-          <p className="eyebrow">Toram Adventurer Ledger</p>
-          <h1>Plan the next route before you spend the next hour.</h1>
+        <div className="heroCopy">
+          <p className="eyebrow">Field ledger for returning adventurers</p>
+          <h1>Choose a useful route before the session timer starts.</h1>
           <p className="lede">
-            A calm, data-backed ledger for returning players: inspect quests, trace item relationships,
-            and spot efficient Smart Play opportunities from validated Coryn-derived data.
+            Inspect quests, farming targets, monster bands, and data confidence from one calm planning surface.
+            The ledger points to good fits from validated local data without pretending every route is perfect.
           </p>
           <div className="actions">
             <Link href="/explorer" className="primaryLink">Open Explorer</Link>
@@ -47,11 +48,39 @@ export default async function Home() {
             <a href={`${PUBLIC_API_BASE_URL}/health`} className="ghostLink">API Health</a>
           </div>
         </div>
-        <aside className="statusPanel">
-          <span className="stamp">Data quality</span>
-          <strong>{summary ? `${summary.validation.error_count} findings` : "API offline"}</strong>
-          <p>{summary ? "Validation is wired into the pipeline. Remaining findings are visible, not hidden." : "Run the backend and ETL to populate the dashboard."}</p>
+        <aside className="statusPanel routeSeal">
+          <span className="stamp">Trust check</span>
+          <strong>{qualityLabel}</strong>
+          <p>
+            {summary
+              ? "Recommendations are grounded in loaded records and quality findings stay visible."
+              : "Start the backend and loader before trusting planning results."}
+          </p>
         </aside>
+      </section>
+
+      <section className="sessionPlanner" aria-label="Session planner shortcuts">
+        <div>
+          <p className="eyebrow">Plan a short session</p>
+          <h2>What do you want to move forward?</h2>
+        </div>
+        <div className="plannerChoices">
+          <Link href="/recommendations?level=70">
+            <span>45 min</span>
+            <strong>Leveling route</strong>
+            <small>Maps and quest leads near Lv 70</small>
+          </Link>
+          <Link href="/farming?goal=quest_material&level=70">
+            <span>30 min</span>
+            <strong>Quest materials</strong>
+            <small>Targets with linked quest usage</small>
+          </Link>
+          <Link href="/side-quests?level=70&goal=exp">
+            <span>60 min</span>
+            <strong>Side quest EXP</strong>
+            <small>Good fit, not absolute best</small>
+          </Link>
+        </div>
       </section>
 
       <section className="metricRow" aria-label="Dataset counts">
@@ -69,16 +98,18 @@ export default async function Home() {
       <section className="dashboardGrid">
         <article className="ledgerBlock wide">
           <div className="sectionHead">
-            <p className="eyebrow">Side quest helper</p>
-            <h2>Highest EXP quest leads</h2>
+            <p className="eyebrow">Route leads</p>
+            <h2>Quest options worth checking</h2>
           </div>
-          <div className="tableLike">
+          <div className="routeList">
             {(summary?.best_exp_quests ?? []).slice(0, 6).map((quest) => (
-              <div className="row" key={quest.id}>
-                <span>{quest.title}</span>
-                <span>Lv {quest.level_required ?? "?"}</span>
-                <strong>{quest.exp_reward?.toLocaleString() ?? "?"} EXP</strong>
-              </div>
+              <Link className="routeCard compactRoute" href={`/quests/${quest.id}`} key={quest.id}>
+                <div>
+                  <strong>{quest.title}</strong>
+                  <span>Lv {quest.level_required ?? "?"} / {quest.npc_name ?? "NPC unknown"}</span>
+                </div>
+                <small>{quest.exp_reward?.toLocaleString() ?? "?"} EXP reward</small>
+              </Link>
             ))}
           </div>
         </article>
@@ -102,7 +133,7 @@ export default async function Home() {
         <article className="ledgerBlock">
           <div className="sectionHead">
             <p className="eyebrow">Farming baseline</p>
-            <h2>NPC value candidates</h2>
+            <h2>Sell value candidates</h2>
           </div>
           <div className="compactList">
             {(summary?.farm_value_candidates ?? []).slice(0, 6).map((item) => (

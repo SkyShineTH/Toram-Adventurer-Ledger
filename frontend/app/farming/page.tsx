@@ -74,7 +74,7 @@ export default async function FarmingPage({ searchParams }: { searchParams?: Sea
 
   return (
     <main className="shell">
-      <nav className="topNav">
+      <nav className="topNav" aria-label="Page navigation">
         <Link href="/">Dashboard</Link>
         <Link href="/profile">Profile</Link>
         <Link href="/explorer">Explorer</Link>
@@ -83,8 +83,8 @@ export default async function FarmingPage({ searchParams }: { searchParams?: Sea
       </nav>
 
       <section className="explorerHero">
-        <p className="eyebrow">Farming And Spina Planner Lite</p>
-        <h1>Pick targets first. Confirm drop locations second.</h1>
+        <p className="eyebrow">Farming board</p>
+        <h1>Pick targets first, then verify the route in game.</h1>
         <p className="lede">
           The current ledger can rank farming targets by NPC sell value and quest material usage. It does not yet
           claim monster drop routes until validated drop relationships are loaded.
@@ -113,7 +113,7 @@ export default async function FarmingPage({ searchParams }: { searchParams?: Sea
 
       <section className="farmingGrid">
         <article className="ledgerBlock statusCard">
-          <p className="eyebrow">Planner mode</p>
+          <p className="eyebrow">Current assumptions</p>
           <strong>{GOALS.find((option) => option.value === plan.goal)?.label ?? "Balanced"}</strong>
           <span>Lv {playerLevel}</span>
           <small>Target ranking only; no invented drop locations.</small>
@@ -122,10 +122,10 @@ export default async function FarmingPage({ searchParams }: { searchParams?: Sea
         <article className="ledgerBlock wide">
           <div className="sectionHead">
             <p className="eyebrow">Target candidates</p>
-            <h2>Items worth checking</h2>
+            <h2>Good farming leads with current filters</h2>
           </div>
           {plan.items.length > 0 ? (
-            <div className="questCardList">
+            <div className="questCardList farmingCards">
               {plan.items.map((item) => (
                 <section className="questCard" key={item.item_id}>
                   <div className="questCardHeader">
@@ -137,10 +137,11 @@ export default async function FarmingPage({ searchParams }: { searchParams?: Sea
                     </div>
                     <b>{item.sell?.toLocaleString() ?? "-"} spina</b>
                   </div>
-                  <p>{item.reason}</p>
+                  <p className="routeReason">{item.reason}</p>
                   <div className="questStats">
                     <span>{item.quest_usage_count} quest use(s)</span>
                     <span>Score {item.score.toLocaleString()}</span>
+                    <span>{item.quest_usages.length > 0 ? "Linked to quests" : "Needs route check"}</span>
                   </div>
                   {item.quest_usages.length > 0 ? (
                     <ul>
@@ -165,7 +166,7 @@ export default async function FarmingPage({ searchParams }: { searchParams?: Sea
         <article className="ledgerBlock">
           <div className="sectionHead">
             <p className="eyebrow">Data boundary</p>
-            <h2>Current limitations</h2>
+            <h2>What this board will not claim</h2>
           </div>
           <div className="compactList">
             {plan.limitations.map((limitation) => (
