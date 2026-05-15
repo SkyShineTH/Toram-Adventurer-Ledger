@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { ComparePanel, type CompareItem } from "../compare-panel";
 import { fetchApi } from "../api-client";
+import { PlannerContextBar } from "../planner-context";
 import { ApiUnavailableNotice, LoaderRequiredNotice } from "../runtime-state";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -71,6 +73,19 @@ export default async function FarmingPage({ searchParams }: { searchParams?: Sea
   const playerLevel = parseLevel(firstValue(params.level));
   const goal = parseGoal(firstValue(params.goal));
   const plan = await getFarmingPlan(goal, playerLevel);
+  const compareItems: CompareItem[] = plan.items.map((item) => ({
+    id: String(item.item_id),
+    title: item.item_name ?? `Item ${item.item_id}`,
+    href: `/items/${item.item_id}`,
+    meta: `${item.type_label ?? "unknown type"} / ${item.sell?.toLocaleString() ?? "-"} spina`,
+    facts: [
+      { label: "NPC sell", value: `${item.sell?.toLocaleString() ?? "-"} spina` },
+      { label: "Quest use", value: `${item.quest_usage_count} quest(s)` },
+      { label: "Score", value: item.score.toLocaleString() },
+      { label: "Route status", value: item.quest_usages.length ? "Linked quest usage" : "Needs manual route check" },
+      { label: "Reason", value: item.reason },
+    ],
+  }));
 
   return (
     <main className="shell">
@@ -110,6 +125,17 @@ export default async function FarmingPage({ searchParams }: { searchParams?: Sea
       </form>
 
       {plan.error ? <ApiUnavailableNotice message={plan.error} /> : null}
+
+      <PlannerContextBar
+        title="Farming context"
+        chips={[
+          { label: "Level", value: `Lv ${playerLevel}`, tone: "good" },
+          { label: "Goal", value: GOALS.find((option) => option.value === goal)?.label ?? goal },
+          { label: "Data boundary", value: "Target ranking only", tone: "warn" },
+          { label: "Results", value: `${plan.items.length} candidate(s)`, tone: plan.items.length ? "good" : "warn" },
+        ]}
+        state={{ path: "/farming", label: "Farming planner", params: { level: playerLevel, goal } }}
+      />
 
       <section className="farmingGrid">
         <article className="ledgerBlock statusCard">
@@ -177,6 +203,8 @@ export default async function FarmingPage({ searchParams }: { searchParams?: Sea
           </div>
         </article>
       </section>
+
+      <ComparePanel items={compareItems} label="Farming target" />
     </main>
   );
 }

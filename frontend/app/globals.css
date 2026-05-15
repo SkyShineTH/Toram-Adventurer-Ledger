@@ -293,7 +293,9 @@ h2 {
 .statusPanel,
 .ledgerBlock,
 .metric,
-.sessionPlanner {
+.sessionPlanner,
+.contextBar,
+.comparePanel {
   border: 1px solid var(--line);
   background: rgba(247, 240, 223, 0.82);
   box-shadow: var(--shadow);
@@ -389,6 +391,70 @@ h2 {
 
 .plannerChoices strong {
   font-size: 1.1rem;
+}
+
+.contextBar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  margin: 20px 0;
+  padding: 16px;
+  border-left: 6px solid var(--river);
+}
+
+.contextChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.contextChip {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  min-height: 36px;
+  border: 1px solid var(--line);
+  padding: 7px 10px;
+  background: rgba(255, 250, 236, 0.56);
+  color: var(--ink-soft);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+}
+
+.contextChip b {
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.contextChip.good {
+  border-color: color-mix(in srgb, var(--forest) 42%, var(--line));
+  background: rgba(220, 229, 204, 0.62);
+}
+
+.contextChip.warn {
+  border-color: color-mix(in srgb, var(--copper) 48%, var(--line));
+  background: rgba(164, 92, 42, 0.12);
+}
+
+.plannerMemory {
+  display: grid;
+  gap: 7px;
+  justify-items: end;
+  min-width: 190px;
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+}
+
+.plannerMemory a {
+  min-height: 36px;
+  border: 1px solid var(--line-strong);
+  padding: 8px 10px;
+  background: rgba(255, 250, 236, 0.62);
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 800;
 }
 
 .metricRow {
@@ -828,6 +894,107 @@ h2 {
   margin-top: 18px;
 }
 
+.comparePanel {
+  margin-top: 18px;
+  padding: 24px;
+}
+
+.comparePicker {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.compareToggle {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  min-height: 74px;
+  border: 1px solid var(--line);
+  padding: 12px;
+  background: rgba(255, 250, 236, 0.46);
+  cursor: pointer;
+}
+
+.compareToggle input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--forest);
+}
+
+.compareToggle strong,
+.compareToggle small {
+  display: block;
+}
+
+.compareToggle strong {
+  line-height: 1.2;
+}
+
+.compareToggle small {
+  margin-top: 5px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.compareToggle:has(input:checked) {
+  border-color: var(--forest);
+  background: rgba(220, 229, 204, 0.72);
+}
+
+.compareToggle:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.compareGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.compareCard {
+  display: grid;
+  gap: 9px;
+  border: 1px solid var(--line);
+  padding: 14px;
+  background: rgba(255, 250, 236, 0.52);
+}
+
+.compareCard > span {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.compareCard dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.compareCard dl div {
+  display: grid;
+  gap: 2px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+}
+
+.compareCard dt {
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.compareCard dd {
+  margin: 0;
+  line-height: 1.45;
+}
+
 @media (max-width: 1080px) {
   .appHeader {
     grid-template-columns: 1fr;
@@ -860,7 +1027,9 @@ h2 {
   }
 
   .metricRow,
-  .plannerChoices {
+  .plannerChoices,
+  .comparePicker,
+  .compareGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -928,15 +1097,26 @@ h2 {
   .questCardHeader,
   .finding div,
   .searchResult div,
-  .pager {
+  .pager,
+  .contextBar {
     grid-template-columns: 1fr;
     flex-direction: column;
     align-items: stretch;
   }
 
+  .plannerMemory {
+    justify-items: start;
+  }
+
+  .comparePicker,
+  .compareGrid {
+    grid-template-columns: 1fr;
+  }
+
   .ledgerBlock,
   .statusPanel,
-  .sessionPlanner {
+  .sessionPlanner,
+  .comparePanel {
     padding: 18px;
   }
 }

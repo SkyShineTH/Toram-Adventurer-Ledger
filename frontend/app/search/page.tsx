@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { fetchApi } from "../api-client";
 import { entityHref } from "../entity-links";
+import { PlannerContextBar } from "../planner-context";
 import { ApiUnavailableNotice } from "../runtime-state";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -72,6 +73,17 @@ export default async function SearchPage({ searchParams }: { searchParams?: Sear
       </form>
 
       {results.error ? <ApiUnavailableNotice message={results.error} /> : null}
+
+      <PlannerContextBar
+        title="Search context"
+        chips={[
+          { label: "Query", value: query.trim() || "Not set", tone: query.trim() ? "good" : "warn" },
+          { label: "Scope", value: entityType || "All entities" },
+          { label: "Mode", value: results.mode },
+          { label: "Matches", value: String(results.items.length), tone: results.items.length ? "good" : "warn" },
+        ]}
+        state={{ path: "/search", label: "Search", params: { q: query, entity_type: entityType } }}
+      />
 
       <section className="ledgerBlock searchResults">
         <div className="sectionHead">

@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.config import load_project_env
+from backend.data_coverage import data_coverage
 from backend.farming import farming_plan
 from backend.graph import (
     build_ledger_graph,
@@ -17,6 +18,7 @@ from backend.graph import (
     leveling_recommendations,
     quest_recommendations,
 )
+from backend.rag import ask_ledger
 from backend.repositories import LedgerRepository, MissingGeneratedFileError, create_repository
 from backend.side_quests import side_quest_recommendations
 
@@ -123,6 +125,11 @@ def validation_findings(limit: int = 50, offset: int = 0) -> dict[str, Any]:
     return {"total": total, "limit": limit, "offset": offset, "items": rows[offset : offset + limit]}
 
 
+@app.get("/data/coverage")
+def coverage() -> dict[str, Any]:
+    return data_coverage(repository)
+
+
 @app.get("/dashboard/smart-play")
 def smart_play_dashboard() -> dict[str, Any]:
     return repository.smart_play_summary()
@@ -174,6 +181,11 @@ def search(q: str, entity_type: str | None = None, limit: int = 10) -> dict[str,
         "mode": "lexical",
         "items": repository.search_documents(q, entity_type=entity_type, limit=limit),
     }
+
+
+@app.get("/rag/ask")
+def rag_ask(q: str, entity_type: str | None = None, limit: int = 5) -> dict[str, Any]:
+    return ask_ledger(repository, query=q, entity_type=entity_type, limit=limit)
 
 
 @app.get("/items")

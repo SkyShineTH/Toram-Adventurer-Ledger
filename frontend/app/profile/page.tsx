@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PlannerContextBar } from "../planner-context";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -59,6 +60,7 @@ export default async function ProfilePage({ searchParams }: { searchParams?: Sea
   const mainStat = firstValue(params.main_stat).trim() || suggestedStat(weapon);
   const sideQuestGoal = goal === "spina" ? "item_collection" : goal;
   const searchQuery = buildSearchQuery(weapon, budget, mainStat);
+  const completeness = profileCompleteness({ level, weapon, goal, budget, mainStat });
 
   return (
     <main className="shell">
@@ -121,6 +123,22 @@ export default async function ProfilePage({ searchParams }: { searchParams?: Sea
         <button type="submit">Update profile</button>
       </form>
 
+      <PlannerContextBar
+        title="Profile context"
+        chips={[
+          { label: "Level", value: `Lv ${level}`, tone: "good" },
+          { label: "Weapon", value: weapon },
+          { label: "Goal", value: GOALS.find((item) => item.value === goal)?.label ?? goal },
+          { label: "Budget", value: BUDGETS.find((item) => item.value === budget)?.label ?? budget },
+          { label: "Completeness", value: `${completeness.score}/5`, tone: completeness.score >= 5 ? "good" : "warn" },
+        ]}
+        state={{
+          path: "/profile",
+          label: "Profile planner",
+          params: { level, weapon, goal, budget, main_stat: mainStat },
+        }}
+      />
+
       <section className="profileGrid">
         <article className="ledgerBlock statusCard">
           <p className="eyebrow">Current profile</p>
@@ -162,13 +180,16 @@ export default async function ProfilePage({ searchParams }: { searchParams?: Sea
 
         <article className="ledgerBlock">
           <div className="sectionHead">
-            <p className="eyebrow">MVP boundary</p>
-            <h2>What this does not store yet</h2>
+            <p className="eyebrow">Profile readiness</p>
+            <h2>{completeness.score >= 5 ? "Ready for route helpers" : "Add the missing assumptions"}</h2>
           </div>
-          <p className="lede detailNote">
-            Profiles are intentionally not saved server-side yet. Once recommendations prove useful, this can become
-            a persisted profile tied to weapon, stats, target content, and budget history.
-          </p>
+          <div className="compactList">
+            {completeness.notes.map((note) => (
+              <div key={note}>
+                <span>{note}</span>
+              </div>
+            ))}
+          </div>
         </article>
       </section>
     </main>
@@ -193,4 +214,47 @@ function suggestedStat(weapon: string): string {
 function buildSearchQuery(weapon: string, budget: string, mainStat: string): string {
   const budgetTerm = budget === "low" ? "npc material" : budget === "medium" ? "crafted material" : "rare gear";
   return `${weapon} ${mainStat} ${budgetTerm}`;
+}
+
+function profileCompleteness({
+  level,
+  weapon,
+  goal,
+  budget,
+  mainStat,
+}: {
+  level: number;
+  weapon: string;
+  goal: string;
+  budget: string;
+  mainStat: string;
+}) {
+  const notes: string[] = [];
+  let score = 0;
+  if (level > 1) {
+    score += 1;
+    notes.push(`Level set to Lv ${level}.`);
+  } else {
+    notes.push("Add a real level so route helpers can narrow the range.");
+  }
+  if (weapon) {
+    score += 1;
+    notes.push(`${weapon} selected for search context.`);
+  }
+  if (mainStat) {
+    score += 1;
+    notes.push(`${mainStat} is available for gear/material searches.`);
+  }
+  if (goal !== "balanced") {
+    score += 1;
+    notes.push("Goal is specific enough to bias helper links.");
+  } else {
+    notes.push("Choose a specific goal when you want less generic route leads.");
+  }
+  if (budget) {
+    score += 1;
+    notes.push(`${budget} budget keeps farming/search suggestions grounded.`);
+  }
+  notes.push("Profile state is saved in this browser and URL-based; no account is required.");
+  return { score, notes };
 }

@@ -27,6 +27,7 @@ Key endpoints:
 - `GET /ready`
 - `GET /validation/summary`
 - `GET /validation/findings?limit=&offset=`
+- `GET /data/coverage`
 - `GET /dashboard/smart-play`
 - `GET /graph/summary`
 - `GET /graph/items/{item_id}/quest-paths?limit=`
@@ -35,6 +36,7 @@ Key endpoints:
 - `GET /side-quests/recommendations?player_level=&goal=balanced|exp|item_collection&limit=`
 - `GET /farming/plan?goal=balanced|npc_sell|quest_material&player_level=&limit=`
 - `GET /search?q=&entity_type=&limit=`
+- `GET /rag/ask?q=&entity_type=&limit=`
 - `GET /items?q=&type_label=&min_sell=&max_sell=`
 - `GET /items/{item_id}`
 - `GET /maps`
@@ -53,3 +55,9 @@ not present in validated quest objective data.
 `/farming/plan` returns target items for NPC sell value and quest material planning.
 It explicitly reports that drop locations are not ranked until validated
 Monster -> Drop -> Item relationships exist in the warehouse.
+
+`/rag/ask` returns a cited lexical answer from `search_documents`. It is the RAG
+surface before embeddings or LLM synthesis are enabled.
+
+`/data/coverage` reports which normalized relationships are loaded and which
+route-critical sources, such as drops and crafting recipes, are still unavailable.

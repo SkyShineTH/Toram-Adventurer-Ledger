@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { ComparePanel, type CompareItem } from "../compare-panel";
 import { fetchApi } from "../api-client";
+import { PlannerContextBar } from "../planner-context";
 import { ApiUnavailableNotice, LoaderRequiredNotice } from "../runtime-state";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -52,6 +54,19 @@ export default async function SideQuestsPage({ searchParams }: { searchParams?: 
   const playerLevel = parseLevel(firstValue(params.level));
   const goal = parseGoal(firstValue(params.goal));
   const { items: quests, error } = await getSideQuests(playerLevel, goal);
+  const compareItems: CompareItem[] = quests.map((quest) => ({
+    id: String(quest.id),
+    title: quest.title,
+    href: `/quests/${quest.id}`,
+    meta: `Lv ${quest.level_required} / ${quest.npc_name ?? "Unknown NPC"}`,
+    facts: [
+      { label: "EXP", value: quest.exp_reward.toLocaleString() },
+      { label: "EXP/objective", value: quest.exp_per_objective.toLocaleString() },
+      { label: "Objectives", value: String(quest.objective_count) },
+      { label: "Level gap", value: String(quest.level_gap) },
+      { label: "Friction", value: quest.required_items.length ? `${quest.required_items.length} linked item(s)` : "No linked item objective" },
+    ],
+  }));
 
   return (
     <main className="shell">
@@ -93,6 +108,16 @@ export default async function SideQuestsPage({ searchParams }: { searchParams?: 
       </form>
 
       {error ? <ApiUnavailableNotice message={error} /> : null}
+
+      <PlannerContextBar
+        title="Quest context"
+        chips={[
+          { label: "Level", value: `Lv ${playerLevel}`, tone: "good" },
+          { label: "Goal", value: GOALS.find((option) => option.value === goal)?.label ?? goal },
+          { label: "Results", value: `${quests.length} candidate(s)`, tone: quests.length ? "good" : "warn" },
+        ]}
+        state={{ path: "/side-quests", label: "Side quest helper", params: { level: playerLevel, goal } }}
+      />
 
       <section className="questHelperGrid">
         <article className="ledgerBlock statusCard">
@@ -145,6 +170,8 @@ export default async function SideQuestsPage({ searchParams }: { searchParams?: 
           )}
         </article>
       </section>
+
+      <ComparePanel items={compareItems} label="Side quest" />
     </main>
   );
 }

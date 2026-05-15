@@ -22,21 +22,29 @@ type ValidationFinding = {
   message: string;
 };
 
+type DataCoverage = {
+  loaded: Record<string, number>;
+  relationships: Array<{ name: string; status: string; note: string }>;
+  next_normalization_targets: string[];
+};
+
 async function getQualityReport() {
-  const [summary, findings] = await Promise.all([
+  const [summary, findings, coverage] = await Promise.all([
     fetchApi<ValidationSummary>("/validation/summary"),
     fetchApi<ApiList<ValidationFinding>>("/validation/findings?limit=25"),
+    fetchApi<DataCoverage>("/data/coverage"),
   ]);
 
   return {
     summary: summary.ok ? summary.data : null,
     findings: findings.ok ? findings.data : { total: 0, limit: 25, offset: 0, items: [] },
-    error: summary.ok ? (findings.ok ? null : findings.message) : summary.message,
+    coverage: coverage.ok ? coverage.data : null,
+    error: summary.ok ? (findings.ok ? (coverage.ok ? null : coverage.message) : findings.message) : summary.message,
   };
 }
 
 export default async function QualityPage() {
-  const { summary, findings, error } = await getQualityReport();
+  const { summary, findings, coverage, error } = await getQualityReport();
   const errorsByEntity = Object.entries(summary?.counts.errors_by_entity ?? {});
   const errorsByCode = Object.entries(summary?.counts.errors_by_code ?? {});
 
@@ -93,6 +101,29 @@ export default async function QualityPage() {
           ) : (
             <p className="emptyState">No validation findings are available.</p>
           )}
+        </div>
+      </section>
+
+      <section className="ledgerBlock findingsBlock">
+        <div className="sectionHead">
+          <p className="eyebrow">Normalization readiness</p>
+          <h2>Drop and craft coverage</h2>
+        </div>
+        <div className="findingList">
+          {(coverage?.relationships ?? []).map((relationship) => (
+            <article className="finding" key={relationship.name}>
+              <div>
+                <strong>{relationship.name}</strong>
+                <span>{relationship.status.replace("_", " ")}</span>
+              </div>
+              <p>{relationship.note}</p>
+            </article>
+          ))}
+        </div>
+        <div className="questStats">
+          {(coverage?.next_normalization_targets ?? []).map((target) => (
+            <span key={target}>{target}</span>
+          ))}
         </div>
       </section>
     </main>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { fetchApi } from "../api-client";
+import { PlannerContextBar } from "../planner-context";
 import { ApiUnavailableNotice, LoaderRequiredNotice } from "../runtime-state";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -94,6 +95,17 @@ export default async function RecommendationsPage({ searchParams }: { searchPara
 
       {error ? <ApiUnavailableNotice message={error} /> : null}
       {!error && graph && graph.nodes === 0 ? <LoaderRequiredNotice /> : null}
+
+      <PlannerContextBar
+        title="Route context"
+        chips={[
+          { label: "Level", value: `Lv ${playerLevel}`, tone: "good" },
+          { label: "Quest leads", value: `${quests.length}` },
+          { label: "Map leads", value: `${leveling.length}` },
+          { label: "Graph", value: graph ? `${graph.nodes.toLocaleString()} nodes` : "Unavailable", tone: graph ? "good" : "warn" },
+        ]}
+        state={{ path: "/recommendations", label: "Route board", params: { level: playerLevel } }}
+      />
 
       <section className="recommendationGrid">
         <article className="ledgerBlock statusCard">

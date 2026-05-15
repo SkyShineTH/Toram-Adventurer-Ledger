@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/side-quests", label: "Side Quests" },
   { href: "/profile", label: "Profile" },
   { href: "/search", label: "Search" },
+  { href: "/ask", label: "Ask" },
   { href: "/quality", label: "Quality" },
 ];
 
